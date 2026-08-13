@@ -1407,110 +1407,995 @@ Request Withdrawal
 }
 
 
-/* =========================================================
-   INVESTMENT
-========================================================= */
+<!-- =========================================================
+     APEX VENTURES — INVESTMENT
+========================================================= -->
 
-function investPage(){
-
-const plans = [
-
-{
-name:"Starter",
-amount:750,
-profit:210,
-duration:"3 Hours",
-growth:"28%"
-},
-
-{
-name:"Growth",
-amount:1500,
-profit:450,
-duration:"6 Hours",
-growth:"30%"
-},
-
-{
-name:"Premium",
-amount:3000,
-profit:1050,
-duration:"12 Hours",
-growth:"35%"
-},
-
-{
-name:"Elite",
-amount:5000,
-profit:2000,
-duration:"24 Hours",
-growth:"40%"
-},
-
-{
-name:"Executive",
-amount:10000,
-profit:4500,
-duration:"48 Hours",
-growth:"45%"
-},
-
-{
-name:"Apex Plus",
-amount:25000,
-profit:12500,
-duration:"72 Hours",
-growth:"50%"
+<style>
+.invest-page{
+  display:flex;
+  flex-direction:column;
+  gap:22px;
 }
 
-];
+.invest-hero{
+  padding:28px;
+  border:1px solid var(--panel-border);
+  border-radius:18px;
+  background:
+    linear-gradient(135deg,
+      rgba(198,164,92,.12),
+      transparent 55%),
+    var(--bg-card);
+}
+
+.invest-hero small{
+  color:var(--brass-bright);
+  font-family:'IBM Plex Mono',monospace;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+
+.invest-hero h1{
+  margin-top:8px;
+  font-size:2rem;
+}
+
+.invest-hero p{
+  margin-top:8px;
+  color:var(--text-secondary);
+}
+
+.balance-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:14px;
+}
+
+.balance-card{
+  padding:20px;
+  border:1px solid var(--panel-border);
+  border-radius:14px;
+  background:var(--bg-elevated);
+}
+
+.balance-card span{
+  display:block;
+  color:var(--text-secondary);
+  font-size:.78rem;
+  margin-bottom:9px;
+}
+
+.balance-card strong{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:1.15rem;
+}
+
+.section-title{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:12px;
+}
+
+.section-title h2{
+  font-size:1.35rem;
+}
+
+.section-title span{
+  color:var(--text-faint);
+  font-size:.8rem;
+}
+
+.plan-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:16px;
+}
+
+.plan-card{
+  position:relative;
+  padding:22px;
+  border:1px solid var(--panel-border);
+  border-radius:16px;
+  background:var(--bg-card);
+  transition:.25s;
+}
+
+.plan-card:hover{
+  transform:translateY(-3px);
+  border-color:var(--brass);
+}
+
+.plan-card.featured{
+  border-color:var(--brass);
+  box-shadow:0 0 25px rgba(198,164,92,.08);
+}
+
+.plan-badge{
+  position:absolute;
+  right:14px;
+  top:14px;
+  padding:4px 8px;
+  border-radius:20px;
+  font-size:.65rem;
+  color:var(--brass-bright);
+  border:1px solid var(--panel-border);
+}
+
+.plan-card h3{
+  margin-bottom:15px;
+}
+
+.plan-amount{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:1.35rem;
+  margin-bottom:15px;
+}
+
+.plan-info{
+  display:flex;
+  justify-content:space-between;
+  padding:9px 0;
+  border-top:1px solid var(--panel-border);
+  font-size:.82rem;
+}
+
+.plan-info span:first-child{
+  color:var(--text-secondary);
+}
+
+.profit{
+  color:var(--positive);
+}
+
+.start-btn{
+  width:100%;
+  margin-top:17px;
+  padding:12px;
+  border:0;
+  border-radius:9px;
+  background:var(--brass);
+  color:var(--navy-deep);
+  font-weight:600;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.start-btn:hover{
+  background:var(--brass-bright);
+  transform:translateY(-1px);
+}
+
+/* Growth chart */
+.chart-card{
+  padding:22px;
+  border:1px solid var(--panel-border);
+  border-radius:16px;
+  background:var(--bg-card);
+}
+
+.chart-wrap{
+  position:relative;
+  height:280px;
+  margin-top:15px;
+  border-left:1px solid var(--panel-border);
+  border-bottom:1px solid var(--panel-border);
+  overflow:hidden;
+}
+
+.grid-line{
+  position:absolute;
+  left:0;
+  right:0;
+  border-top:1px dashed var(--panel-border);
+}
+
+.grid-1{top:20%}
+.grid-2{top:40%}
+.grid-3{top:60%}
+.grid-4{top:80%}
+
+.y-label{
+  position:absolute;
+  left:-45px;
+  color:var(--text-faint);
+  font:10px 'IBM Plex Mono',monospace;
+}
+
+.y1{top:17%}
+.y2{top:37%}
+.y3{top:57%}
+.y4{top:77%}
+
+.chart-line{
+  position:absolute;
+  left:5%;
+  right:3%;
+  top:25%;
+  height:55%;
+}
+
+.chart-line svg{
+  width:100%;
+  height:100%;
+  overflow:visible;
+}
+
+.chart-path{
+  fill:none;
+  stroke:var(--brass-bright);
+  stroke-width:3;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
+.chart-area{
+  fill:rgba(198,164,92,.08);
+}
+
+.chart-dot{
+  fill:var(--brass-bright);
+}
+
+.x-axis{
+  display:flex;
+  justify-content:space-between;
+  padding:8px 4px 0;
+  color:var(--text-faint);
+  font:10px 'IBM Plex Mono',monospace;
+}
+
+/* Transaction */
+.transactions{
+  border:1px solid var(--panel-border);
+  border-radius:16px;
+  background:var(--bg-card);
+  overflow:hidden;
+}
+
+.transaction{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:16px 18px;
+  border-bottom:1px solid var(--panel-border);
+}
+
+.transaction:last-child{
+  border-bottom:0;
+}
+
+.transaction-left{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.transaction-icon{
+  width:38px;
+  height:38px;
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(198,164,92,.08);
+  color:var(--brass-bright);
+}
+
+.transaction-name{
+  font-size:.88rem;
+}
+
+.transaction-date{
+  color:var(--text-faint);
+  font-size:.7rem;
+  margin-top:3px;
+}
+
+.transaction-amount{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.82rem;
+}
+
+.modal{
+  position:fixed;
+  inset:0;
+  background:var(--overlay);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  z-index:100;
+}
+
+.modal.show{
+  display:flex;
+}
+
+.modal-box{
+  width:100%;
+  max-width:420px;
+  background:var(--bg-card);
+  border:1px solid var(--panel-border);
+  border-radius:18px;
+  padding:24px;
+}
+
+.modal-box h2{
+  margin-bottom:8px;
+}
+
+.modal-box p{
+  color:var(--text-secondary);
+  font-size:.85rem;
+  margin-bottom:18px;
+}
+
+.modal-box input{
+  width:100%;
+  padding:13px;
+  border-radius:9px;
+  border:1px solid var(--panel-border);
+  background:var(--bg-elevated);
+  color:var(--text-primary);
+  outline:none;
+  margin-bottom:12px;
+}
+
+.modal-actions{
+  display:flex;
+  gap:10px;
+}
+
+.modal-actions button{
+  flex:1;
+  padding:12px;
+  border-radius:9px;
+  cursor:pointer;
+}
+
+.cancel-btn{
+  background:transparent;
+  border:1px solid var(--panel-border);
+  color:var(--text-secondary);
+}
+
+.confirm-btn{
+  background:var(--brass);
+  border:0;
+  color:var(--navy-deep);
+  font-weight:600;
+}
+
+@media(max-width:850px){
+  .plan-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .balance-grid{
+    grid-template-columns:1fr 1fr;
+  }
+}
+
+@media(max-width:600px){
+  .plan-grid,
+  .balance-grid{
+    grid-template-columns:1fr;
+  }
+
+  .invest-hero{
+    padding:22px;
+  }
+
+  .invest-hero h1{
+    font-size:1.6rem;
+  }
+}
+</style>
+
+<div class="invest-page">
+
+  <!-- HEADER -->
+  <section class="invest-hero">
+    <small>Apex Ventures • Growth</small>
+    <h1>Investment Plans</h1>
+    <p>
+      Choose an available plan and start an investment from your wallet.
+    </p>
+  </section>
+
+  <!-- BALANCES -->
+  <section>
+    <div class="balance-grid">
+
+      <div class="balance-card">
+        <span>Available Balance</span>
+        <strong id="availableBalance">KES 0</strong>
+      </div>
+
+      <div class="balance-card">
+        <span>Total Invested</span>
+        <strong id="investedBalance">KES 0</strong>
+      </div>
+
+      <div class="balance-card">
+        <span>Total Growth</span>
+        <strong class="profit" id="growthBalance">KES 0</strong>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- PLANS -->
+  <section>
+
+    <div class="section-title">
+      <h2>Available Plans</h2>
+      <span>Choose a plan</span>
+    </div>
+
+    <div class="plan-grid">
+
+      <div class="plan-card">
+        <h3>Starter</h3>
+        <div class="plan-amount">KES 750+</div>
+
+        <div class="plan-info">
+          <span>Duration</span>
+          <strong>3 Hours</strong>
+        </div>
+
+        <div class="plan-info">
+          <span>Growth</span>
+          <strong class="profit">28%</strong>
+        </div>
+
+        <div class="plan-info">
+          <span>Risk Level</span>
+          <strong>Low</strong>
+        </div>
+
+        <button class="start-btn" data-plan="Starter" data-min="750">
+          Start Investment
+        </button>
+      </div>
 
 
-return `
+      <div class="plan-card featured">
 
-<div class="page">
+        <div class="plan-badge">POPULAR</div>
 
-<h1 class="page-title">
-Investment Plans
-</h1>
+        <h3>Growth</h3>
+        <div class="plan-amount">KES 1,500+</div>
 
-<p class="page-subtitle">
-Choose a plan that suits your investment goals.
-</p>
+        <div class="plan-info">
+          <span>Duration</span>
+          <strong>6 Hours</strong>
+        </div>
+
+        <div class="plan-info">
+          <span>Growth</span>
+          <strong class="profit">35%</strong>
+        </div>
+
+        <div class="plan-info">
+          <span>Risk Level</span>
+          <strong>Medium</strong>
+        </div>
+
+        <button class="start-btn" data-plan="Growth" data-min="1500">
+          Start Investment
+        </button>
+
+      </div>
 
 
-<div class="plan-grid">
+      <div class="plan-card">
 
-${plans.map(
-(plan,index)=>`
+        <h3>Premium</h3>
+        <div class="plan-amount">KES 3,000+</div>
 
-<div class="plan ${
-index === 2
-? "featured"
-: ""
-}">
+        <div class="plan-info">
+          <span>Duration</span>
+          <strong>12 Hours</strong>
+        </div>
 
-${index === 2
-? `<span class="badge">POPULAR</span>`
-: ""}
+        <div class="plan-info">
+          <span>Growth</span>
+          <strong class="profit">42%</strong>
+        </div>
 
-<h3>
-${plan.name}
-</h3>
+        <div class="plan-info">
+          <span>Risk Level</span>
+          <strong>Medium</strong>
+        </div>
 
-<div class="amount">
-${money(plan.amount)}
+        <button class="start-btn" data-plan="Premium" data-min="3000">
+          Start Investment
+        </button>
+
+      </div>
+
+
+      <div class="plan-card">
+
+        <h3>Elite</h3>
+        <div class="plan-amount">KES 5,000+</div>
+
+        <div class="plan-info">
+          <span>Duration</span>
+          <strong>24 Hours</strong>
+        </div>
+
+        <div class="plan-info">
+          <span>Growth</span>
+          <strong class="profit">50%</strong>
+        </div>
+
+        <div class="plan-info">
+          <span>Risk Level</span>
+          <strong>High</strong>
+        </div>
+
+        <button class="start-btn" data-plan="Elite" data-min="5000">
+          Start Investment
+        </button>
+
+      </div>
+
+
+      <div class="plan-card">
+
+        <h3>Executive</h3>
+        <div class="plan-amount">KES 10,000+</div>
+
+        <div class="plan-info">
+          <span>Duration</span>
+          <strong>48 Hours</strong>
+        </div>
+
+        <div class="plan-info">
+          <span>Growth</span>
+          <strong class="profit">60%</strong>
+        </div>
+
+        <div class="plan-info">
+          <span>Risk Level</span>
+          <strong>High</strong>
+        </div>
+
+        <button class="start-btn" data-plan="Executive" data-min="10000">
+          Start Investment
+        </button>
+
+      </div>
+
+
+      <div class="plan-card">
+
+        <h3>Private</h3>
+        <div class="plan-amount">KES 25,000+</div>
+
+        <div class="plan-info">
+          <span>Duration</span>
+          <strong>72 Hours</strong>
+        </div>
+
+        <div class="plan-info">
+          <span>Growth</span>
+          <strong class="profit">70%</strong>
+        </div>
+
+        <div class="plan-info">
+          <span>Risk Level</span>
+          <strong>High</strong>
+        </div>
+
+        <button class="start-btn" data-plan="Private" data-min="25000">
+          Start Investment
+        </button>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- GROWTH GRAPH -->
+  <section class="chart-card">
+
+    <div class="section-title">
+      <h2>Investment Growth</h2>
+      <span>KES / Time</span>
+    </div>
+
+    <div class="chart-wrap">
+
+      <div class="grid-line grid-1"></div>
+      <div class="grid-line grid-2"></div>
+      <div class="grid-line grid-3"></div>
+      <div class="grid-line grid-4"></div>
+
+      <span class="y-label y1">100%</span>
+      <span class="y-label y2">75%</span>
+      <span class="y-label y3">50%</span>
+      <span class="y-label y4">25%</span>
+
+      <div class="chart-line">
+
+        <svg viewBox="0 0 500 200" preserveAspectRatio="none">
+
+          <path
+            class="chart-area"
+            d="M0,175
+               L80,160
+               L160,145
+               L240,120
+               L320,100
+               L400,65
+               L500,25
+               L500,200
+               L0,200 Z">
+          </path>
+
+          <path
+            class="chart-path"
+            d="M0,175
+               L80,160
+               L160,145
+               L240,120
+               L320,100
+               L400,65
+               L500,25">
+          </path>
+
+          <circle class="chart-dot" cx="0" cy="175" r="4"/>
+          <circle class="chart-dot" cx="160" cy="145" r="4"/>
+          <circle class="chart-dot" cx="320" cy="100" r="4"/>
+          <circle class="chart-dot" cx="500" cy="25" r="4"/>
+
+        </svg>
+
+      </div>
+
+    </div>
+
+    <div class="x-axis">
+      <span>Start</span>
+      <span>25%</span>
+      <span>50%</span>
+      <span>75%</span>
+      <span>Complete</span>
+    </div>
+
+  </section>
+
+
+  <!-- TRANSACTIONS -->
+  <section>
+
+    <div class="section-title">
+      <h2>Investment Transactions</h2>
+      <span>Recent activity</span>
+    </div>
+
+    <div class="transactions" id="transactions">
+
+      <div class="transaction">
+        <div class="transaction-left">
+          <div class="transaction-icon">◈</div>
+
+          <div>
+            <div class="transaction-name">
+              Investment activity
+            </div>
+            <div class="transaction-date">
+              No investment transactions yet
+            </div>
+          </div>
+        </div>
+
+        <div class="transaction-amount">
+          —
+        </div>
+      </div>
+
+    </div>
+
+  </section>
+
 </div>
 
-<p>
-Projected growth:
-<strong>
-${plan.growth}
-</strong>
-</p>
 
-<p>
-Projected return:
-<strong>
-${money(
-plan.amou
+<!-- INVESTMENT MODAL -->
+<div class="modal" id="investmentModal">
+
+  <div class="modal-box">
+
+    <h2 id="modalTitle">Start Investment</h2>
+
+    <p id="modalDescription">
+      Enter the amount you want to allocate to this investment.
+    </p>
+
+    <input
+      type="number"
+      id="investmentAmount"
+      placeholder="Enter amount in KES"
+      min="1"
+    >
+
+    <div class="modal-actions">
+
+      <button
+        class="cancel-btn"
+        id="cancelInvestment">
+        Cancel
+      </button>
+
+      <button
+        class="confirm-btn"
+        id="confirmInvestment">
+        Continue
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<script>
+(() => {
+
+  const modal = document.getElementById("investmentModal");
+  const amountInput = document.getElementById("investmentAmount");
+
+  let selectedPlan = null;
+  let minimumAmount = 0;
+
+
+  /* ==========================================
+     LOAD INVESTMENT DATA
+  ========================================== */
+
+  async function loadInvestmentData(){
+
+    try{
+
+      const data = await window.Apex.apiFetch("/investments/summary");
+
+      document.getElementById("availableBalance").textContent =
+        window.Apex.formatCurrency(data.availableBalance || 0);
+
+      document.getElementById("investedBalance").textContent =
+        window.Apex.formatCurrency(data.totalInvested || 0);
+
+      document.getElementById("growthBalance").textContent =
+        window.Apex.formatCurrency(data.totalGrowth || 0);
+
+      if(Array.isArray(data.transactions)){
+        renderTransactions(data.transactions);
+      }
+
+    }catch(error){
+
+      console.log("Investment summary unavailable:", error.message);
+
+    }
+
+  }
+
+
+  /* ==========================================
+     TRANSACTIONS
+  ========================================== */
+
+  function renderTransactions(items){
+
+    const container =
+      document.getElementById("transactions");
+
+    if(!items.length){
+
+      container.innerHTML = `
+        <div class="transaction">
+          <div class="transaction-left">
+            <div class="transaction-icon">◈</div>
+
+            <div>
+              <div class="transaction-name">
+                No transactions
+              </div>
+
+              <div class="transaction-date">
+                Investment activity will appear here
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      return;
+    }
+
+    container.innerHTML = items.map(item => `
+
+      <div class="transaction">
+
+        <div class="transaction-left">
+
+          <div class="transaction-icon">
+            ${item.type === "profit" ? "↗" : "◈"}
+          </div>
+
+          <div>
+
+            <div class="transaction-name">
+              ${escapeHTML(item.plan || "Investment")}
+            </div>
+
+            <div class="transaction-date">
+              ${escapeHTML(item.status || "Processed")}
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="transaction-amount ${
+          item.type === "profit" ? "profit" : ""
+        }">
+
+          ${window.Apex.formatCurrency(item.amount || 0)}
+
+        </div>
+
+      </div>
+
+    `).join("");
+
+  }
+
+
+  function escapeHTML(value){
+
+    return String(value)
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+
+  }
+
+
+  /* ==========================================
+     START INVESTMENT BUTTONS
+  ========================================== */
+
+  document.querySelectorAll(".start-btn").forEach(button => {
+
+    button.addEventListener("click", () => {
+
+      selectedPlan = button.dataset.plan;
+      minimumAmount = Number(button.dataset.min);
+
+      document.getElementById("modalTitle").textContent =
+        `Start ${selectedPlan} Investment`;
+
+      document.getElementById("modalDescription").textContent =
+        `Minimum amount for the ${selectedPlan} plan is KES ${minimumAmount.toLocaleString()}.`;
+
+      amountInput.value = minimumAmount;
+      amountInput.min = minimumAmount;
+
+      modal.classList.add("show");
+
+      setTimeout(() => amountInput.focus(),100);
+
+    });
+
+  });
+
+
+  /* ==========================================
+     CANCEL
+  ========================================== */
+
+  document.getElementById("cancelInvestment")
+    .addEventListener("click", () => {
+
+      modal.classList.remove("show");
+      amountInput.value = "";
+
+    });
+
+
+  /* ==========================================
+     CONFIRM
+  ========================================== */
+
+  document.getElementById("confirmInvestment")
+    .addEventListener("click", async () => {
+
+      const amount = Number(amountInput.value);
+
+      if(!amount || amount < minimumAmount){
+
+        window.Apex.showToast(
+          `Minimum investment is KES ${minimumAmount.toLocaleString()}`,
+          true
+        );
+
+        return;
+      }
+
+      const confirmButton =
+        document.getElementById("confirmInvestment");
+
+      confirmButton.disabled = true;
+      confirmButton.textContent = "Processing…";
+
+      try{
+
+        /*
+         * This calls your backend.
+         * Your backend should validate the user's balance,
+         * plan and amount before creating an investment.
+         */
+
+        await window.Apex.apiFetch("/investments", {
+          method:"POST",
+          body:JSON.stringify({
+            plan:selectedPlan,
+            amount:amount
+          })
+        });
+
+        modal.classList.remove("show");
+        amountInput.value = "";
+
+        window.Apex.showToast(
+          "Investment request submitted successfully."
+        );
+
+        await loadInvestmentData();
+
+      }catch(error){
+
+        window.Apex.showToast(
+          error.message || "Unable to start investment.",
+          true
+        );
+
+      }finally{
+
+        confirmButton.disabled = false;
+        confirmButton.textContent = "Continue";
+
+      }
+
+    });
+
+
+  /* ==========================================
+     CLOSE MODAL OUTSIDE
+  ========================================== */
+
+  modal.addEventListener("click", event => {
+
+    if(event.target === modal){
+      modal.classList.remove("show");
+    }
+
+  });
+
+
+  loadInvestmentData();
+
+})();
+</script>
