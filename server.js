@@ -5,6 +5,12 @@ const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const Redis = require('ioredis');
+const paystackRoutes =require("./paystack/paystackRoutes");
+
+app.use(
+    "/api/paystack",
+    paystackRoutes
+);
 
 const app = express();
 
