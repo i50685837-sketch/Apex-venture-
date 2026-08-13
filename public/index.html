@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Apex Ventures - Invest, Borrow & Earn</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      /* Money Pot Background: Deep rich dark blues mixed with emerald and gold subtle glows */
+      background: radial-gradient(circle at 50% 20%, #1a2e22 0%, #0d1b1e 40%, #080d1a 100%);
+      color: #f8fafc;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding: 2rem 1rem;
+    }
+
+    header {
+      width: 100%;
+      max-width: 600px;
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    .badge {
+      display: inline-block;
+      background: rgba(234, 179, 8, 0.15);
+      color: #facc15;
+      border: 1px solid rgba(234, 179, 8, 0.3);
+      padding: 0.35rem 0.85rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      /* Emerald to Metallic Gold gradient header */
+      background: linear-gradient(135deg, #10b981, #facc15, #fbbf24);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+      text-shadow: 0 4px 20px rgba(16, 185, 129, 0.2);
+    }
+
+    p.subtitle {
+      color: #94a3b8;
+      font-size: 1.05rem;
+    }
+
+    main {
+      width: 100%;
+      max-width: 420px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      margin: 2rem 0;
+    }
+
+    /* Glassmorphism money cards */
+    .card {
+      background: rgba(30, 41, 59, 0.6);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 1.25rem;
+      text-align: center;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      border-color: #10b981;
+      box-shadow: 0 10px 25px rgba(16, 185, 129, 0.2);
+    }
+
+    .card h2 {
+      font-size: 1.25rem;
+      color: #f1f5f9;
+      margin-bottom: 0.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .card p {
+      color: #94a3b8;
+      font-size: 0.9rem;
+    }
+
+    /* Vibrant Money Pot Get Started Button */
+    .btn-get-started {
+      display: block;
+      width: 100%;
+      padding: 1.1rem;
+      margin-top: 0.5rem;
+      background: linear-gradient(135deg, #059669 0%, #10b981 50%, #d97706 100%);
+      color: #ffffff;
+      font-size: 1.15rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      text-decoration: none;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+      transition: all 0.25s ease;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-get-started:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(16, 185, 129, 0.6);
+      filter: brightness(1.08);
+    }
+
+    footer {
+      text-align: center;
+      font-size: 0.95rem;
+      color: #64748b;
+    }
+
+    footer a {
+      color: #10b981;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="badge">💰 Financial Growth Platform</div>
+    <h1>Apex Ventures</h1>
+    <p class="subtitle">Your ultimate pot for investments, quick loans, and daily task earnings.</p>
+  </header>
+
+  <main>
+    <div class="card">
+      <h2>📈 Invest</h2>
+      <p>Grow your money pot with daily high-return yield packages.</p>
+    </div>
+
+    <div class="card">
+      <h2>💳 Borrow Loan</h2>
+      <p>Get instant credit access credited straight into your balance.</p>
+    </div>
+
+    <div class="card">
+      <h2>📋 Do Surveys</h2>
+      <p>Complete simple tasks and surveys to claim instant cash rewards.</p>
+    </div>
+
+    <!-- Get Started Button -->
+    <a href="/register.html" class="btn-get-started" id="actionBtn">Get Started 🚀</a>
+  </main>
+
+  <footer>
+    <p>Contact us: <a href="mailto:venture@gmail.com">venture@gmail.com</a></p>
+  </footer>
+
+  <script>
+    // Adjust button destination dynamically if logged in
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = JSON.parse(localStorage.getItem('user'));
+      const actionBtn = document.getElementById('actionBtn');
+
+      if (user && actionBtn) {
+        actionBtn.textContent = `Go to Dashboard (${user.name}) 🚀`;
+        actionBtn.href = '/dashboard.html';
+      }
+    });
+  </script>
+</body>
+                        </html>
+
