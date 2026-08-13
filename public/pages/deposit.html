@@ -1,1 +1,686 @@
+<!-- pages/deposit.html -->
+<section class="deposit-page">
 
+<style>
+.deposit-page{
+  max-width:760px;
+  margin:auto;
+  animation:fadeIn .4s ease;
+}
+
+.deposit-head{
+  margin-bottom:22px;
+}
+
+.deposit-head h1{
+  font-size:2rem;
+  margin-bottom:6px;
+}
+
+.deposit-head p{
+  color:var(--text-secondary);
+}
+
+.balance-card{
+  background:linear-gradient(135deg,var(--bg-card),var(--bg-elevated));
+  border:1px solid var(--panel-border);
+  border-radius:18px;
+  padding:22px;
+  margin-bottom:20px;
+}
+
+.balance-label{
+  color:var(--text-secondary);
+  font-size:.85rem;
+}
+
+.balance-value{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:1.8rem;
+  color:var(--brass-bright);
+  margin-top:8px;
+}
+
+.deposit-card{
+  background:var(--bg-card);
+  border:1px solid var(--panel-border);
+  border-radius:18px;
+  padding:24px;
+}
+
+.field{
+  margin-bottom:18px;
+}
+
+.field label{
+  display:block;
+  color:var(--text-secondary);
+  font-size:.85rem;
+  margin-bottom:8px;
+}
+
+.field input,
+.field select{
+  width:100%;
+  padding:14px;
+  border-radius:10px;
+  border:1px solid var(--panel-border);
+  outline:none;
+  background:var(--bg-elevated);
+  color:var(--text-primary);
+  font-family:inherit;
+}
+
+.field input:focus,
+.field select:focus{
+  border-color:var(--brass-bright);
+}
+
+.deposit-btn{
+  width:100%;
+  padding:15px;
+  border:0;
+  border-radius:11px;
+  background:var(--brass-bright);
+  color:#08152a;
+  font-size:1rem;
+  font-weight:700;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.deposit-btn:hover{
+  transform:translateY(-1px);
+}
+
+.deposit-btn:disabled{
+  opacity:.6;
+  cursor:not-allowed;
+  transform:none;
+}
+
+.info{
+  margin-top:18px;
+  padding:14px;
+  border-radius:10px;
+  background:rgba(198,164,92,.06);
+  color:var(--text-secondary);
+  font-size:.82rem;
+  line-height:1.5;
+}
+
+.history{
+  margin-top:26px;
+}
+
+.history h2{
+  margin-bottom:12px;
+}
+
+.transaction{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:15px;
+  margin-bottom:9px;
+  background:var(--bg-card);
+  border:1px solid var(--panel-border);
+  border-radius:12px;
+}
+
+.tx-title{
+  font-weight:600;
+}
+
+.tx-date{
+  color:var(--text-faint);
+  font-size:.74rem;
+  margin-top:4px;
+}
+
+.tx-status{
+  font-size:.72rem;
+  color:var(--text-secondary);
+  margin-top:4px;
+}
+
+.tx-amount{
+  color:var(--positive);
+  font-family:'IBM Plex Mono',monospace;
+  white-space:nowrap;
+}
+
+.empty{
+  text-align:center;
+  color:var(--text-faint);
+  padding:25px;
+}
+
+@keyframes fadeIn{
+  from{
+    opacity:0;
+    transform:translateY(8px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+</style>
+
+
+<div class="deposit-head">
+  <h1>Deposit Funds</h1>
+  <p>Add money to your Apex Ventures wallet.</p>
+</div>
+
+
+<div class="balance-card">
+
+  <div class="balance-label">
+    Current Wallet Balance
+  </div>
+
+  <div class="balance-value" id="walletBalance">
+    KES 0
+  </div>
+
+</div>
+
+
+<div class="deposit-card">
+
+  <div class="field">
+
+    <label for="method">
+      Payment Method
+    </label>
+
+    <select id="method">
+
+      <option value="paystack">
+        Paystack
+      </option>
+
+      <option value="mpesa">
+        M-PESA
+      </option>
+
+    </select>
+
+  </div>
+
+
+  <div class="field">
+
+    <label for="amount">
+      Deposit Amount (KES)
+    </label>
+
+    <input
+      id="amount"
+      type="number"
+      min="1"
+      step="1"
+      placeholder="Enter amount"
+      inputmode="numeric"
+    >
+
+  </div>
+
+
+  <div class="field" id="phoneField" style="display:none">
+
+    <label for="phone">
+      M-PESA Phone Number
+    </label>
+
+    <input
+      id="phone"
+      type="tel"
+      placeholder="07XXXXXXXX"
+      autocomplete="tel"
+    >
+
+  </div>
+
+
+  <button
+    class="deposit-btn"
+    id="depositBtn"
+  >
+    Continue to Payment
+  </button>
+
+
+  <div class="info">
+
+    Your payment will be processed securely through the
+    selected payment gateway. Do not share your payment
+    credentials or gateway secret keys with anyone.
+
+  </div>
+
+</div>
+
+
+<div class="history">
+
+  <h2>Deposit History</h2>
+
+  <div id="depositHistory">
+    <div class="empty">
+      Loading transactions...
+    </div>
+  </div>
+
+</div>
+
+
+<script>
+(async function(){
+
+  const api = window.Apex?.apiFetch;
+
+  if(!api){
+    console.error("Apex API helper is missing.");
+    return;
+  }
+
+  const balanceEl =
+    document.getElementById("walletBalance");
+
+  const amountEl =
+    document.getElementById("amount");
+
+  const methodEl =
+    document.getElementById("method");
+
+  const phoneEl =
+    document.getElementById("phone");
+
+  const phoneField =
+    document.getElementById("phoneField");
+
+  const button =
+    document.getElementById("depositBtn");
+
+  const historyEl =
+    document.getElementById("depositHistory");
+
+
+  function money(value){
+
+    return "KES " +
+      Number(value || 0).toLocaleString();
+
+  }
+
+
+  function notify(message,error=false){
+
+    if(window.Apex?.showToast){
+
+      window.Apex.showToast(
+        message,
+        error
+      );
+
+    }else{
+
+      alert(message);
+
+    }
+
+  }
+
+
+  /* ==========================
+     PAYMENT METHOD
+  ========================== */
+
+  methodEl.addEventListener("change",()=>{
+
+    if(methodEl.value === "mpesa"){
+
+      phoneField.style.display = "block";
+
+      button.textContent =
+        "Request M-PESA Payment";
+
+    }else{
+
+      phoneField.style.display = "none";
+
+      button.textContent =
+        "Continue to Paystack";
+
+    }
+
+  });
+
+
+  /* ==========================
+     LOAD WALLET
+  ========================== */
+
+  async function loadWallet(){
+
+    try{
+
+      const data =
+        await api("/wallet");
+
+      const wallet =
+        data.wallet ||
+        data.data ||
+        data;
+
+      const balance =
+        wallet.availableBalance ??
+        wallet.balance ??
+        wallet.available ??
+        0;
+
+      balanceEl.textContent =
+        money(balance);
+
+    }catch(error){
+
+      console.error(
+        "Wallet loading error:",
+        error
+      );
+
+    }
+
+  }
+
+
+  /* ==========================
+     LOAD DEPOSIT HISTORY
+  ========================== */
+
+  async function loadHistory(){
+
+    try{
+
+      const data =
+        await api("/deposits");
+
+      const deposits =
+        data.deposits ||
+        data.transactions ||
+        data.data ||
+        [];
+
+      if(
+        !Array.isArray(deposits) ||
+        deposits.length === 0
+      ){
+
+        historyEl.innerHTML =
+          '<div class="empty">No deposits yet.</div>';
+
+        return;
+
+      }
+
+
+      historyEl.innerHTML =
+        deposits.map(tx=>{
+
+          const amount =
+            Number(tx.amount || 0);
+
+          const status =
+            tx.status || "pending";
+
+          const date =
+            tx.createdAt
+              ? new Date(
+                  tx.createdAt
+                ).toLocaleString()
+              : "Recent";
+
+
+          return `
+
+            <div class="transaction">
+
+              <div>
+
+                <div class="tx-title">
+                  ${tx.method || "Payment"} Deposit
+                </div>
+
+                <div class="tx-date">
+                  ${date}
+                </div>
+
+                <div class="tx-status">
+                  ${String(status).toUpperCase()}
+                </div>
+
+              </div>
+
+              <div class="tx-amount">
+                + ${money(amount)}
+              </div>
+
+            </div>
+
+          `;
+
+        }).join("");
+
+
+    }catch(error){
+
+      console.error(
+        "Deposit history error:",
+        error
+      );
+
+      historyEl.innerHTML =
+        '<div class="empty">Unable to load deposit history.</div>';
+
+    }
+
+  }
+
+
+  /* ==========================
+     START DEPOSIT
+  ========================== */
+
+  button.addEventListener(
+    "click",
+    async()=>{
+
+      const amount =
+        Number(amountEl.value);
+
+      const method =
+        methodEl.value;
+
+      const phone =
+        phoneEl.value.trim();
+
+
+      if(!amount || amount <= 0){
+
+        notify(
+          "Enter a valid deposit amount.",
+          true
+        );
+
+        return;
+
+      }
+
+
+      if(method === "mpesa"){
+
+        if(!phone){
+
+          notify(
+            "Enter your M-PESA phone number.",
+            true
+          );
+
+          return;
+
+        }
+
+
+        if(
+          !/^(\+254|254|0)7\d{8}$/.test(phone)
+        ){
+
+          notify(
+            "Enter a valid Kenyan M-PESA number.",
+            true
+          );
+
+          return;
+
+        }
+
+      }
+
+
+      button.disabled = true;
+
+      button.textContent =
+        "Starting payment...";
+
+
+      try{
+
+        /*
+          Your backend should expose:
+
+          POST /api/v1/deposits
+
+          Paystack:
+          {
+            amount,
+            method: "paystack"
+          }
+
+          M-PESA:
+          {
+            amount,
+            method: "mpesa",
+            phone
+          }
+        */
+
+        const result =
+          await api(
+            "/deposits",
+            {
+              method:"POST",
+
+              body:JSON.stringify({
+
+                amount:amount,
+
+                method:method,
+
+                ...(method === "mpesa"
+                  ? { phone:phone }
+                  : {})
+
+              })
+
+            }
+          );
+
+
+        /*
+          Paystack normally returns
+          an authorization URL.
+
+          Example:
+
+          {
+            success:true,
+            authorization_url:"https://..."
+          }
+        */
+
+        const paymentUrl =
+          result.authorization_url ||
+          result.authorizationUrl ||
+          result.data?.authorization_url;
+
+
+        if(paymentUrl){
+
+          window.location.href =
+            paymentUrl;
+
+          return;
+
+        }
+
+
+        notify(
+          result.message ||
+          "Payment request created successfully."
+        );
+
+
+        amountEl.value = "";
+
+        await loadWallet();
+
+        await loadHistory();
+
+
+      }catch(error){
+
+        console.error(
+          "Deposit error:",
+          error
+        );
+
+        notify(
+          error.message ||
+          "Unable to start deposit.",
+          true
+        );
+
+      }finally{
+
+        button.disabled = false;
+
+        if(methodEl.value === "mpesa"){
+
+          button.textContent =
+            "Request M-PESA Payment";
+
+        }else{
+
+          button.textContent =
+            "Continue to Paystack";
+
+        }
+
+      }
+
+    }
+  );
+
+
+  await loadWallet();
+
+  await loadHistory();
+
+})();
+</script>
+
+</section>
