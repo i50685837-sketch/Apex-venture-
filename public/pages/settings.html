@@ -1,0 +1,719 @@
+<!-- pages/settings.html -->
+<section class="settings-page">
+
+<style>
+.settings-page{
+  max-width:760px;
+  margin:auto;
+  animation:fadeIn .35s ease;
+}
+
+.settings-head{
+  margin-bottom:22px;
+}
+
+.settings-head h1{
+  font-size:2rem;
+  margin-bottom:6px;
+}
+
+.settings-head p{
+  color:var(--text-secondary);
+}
+
+.settings-card{
+  background:var(--bg-card);
+  border:1px solid var(--panel-border);
+  border-radius:18px;
+  padding:22px;
+  margin-bottom:16px;
+}
+
+.card-title{
+  font-size:1.05rem;
+  margin-bottom:18px;
+  color:var(--text-primary);
+}
+
+.field{
+  margin-bottom:16px;
+}
+
+.field:last-child{
+  margin-bottom:0;
+}
+
+.field label{
+  display:block;
+  color:var(--text-secondary);
+  font-size:.82rem;
+  margin-bottom:7px;
+}
+
+.field input,
+.field select{
+  width:100%;
+  padding:13px 14px;
+  border-radius:10px;
+  border:1px solid var(--panel-border);
+  outline:none;
+  background:var(--bg-elevated);
+  color:var(--text-primary);
+  font-family:inherit;
+}
+
+.field input:focus,
+.field select:focus{
+  border-color:var(--brass-bright);
+}
+
+.field input:disabled{
+  opacity:.65;
+}
+
+.save-btn{
+  width:100%;
+  padding:14px;
+  border:0;
+  border-radius:10px;
+  background:var(--brass-bright);
+  color:#08152a;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.save-btn:disabled{
+  opacity:.6;
+  cursor:not-allowed;
+}
+
+.setting-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
+  padding:14px 0;
+  border-bottom:1px solid var(--panel-border);
+}
+
+.setting-row:last-child{
+  border-bottom:0;
+}
+
+.setting-info strong{
+  display:block;
+  font-size:.9rem;
+}
+
+.setting-info span{
+  display:block;
+  color:var(--text-secondary);
+  font-size:.78rem;
+  margin-top:3px;
+}
+
+.switch{
+  position:relative;
+  width:46px;
+  height:25px;
+  flex-shrink:0;
+}
+
+.switch input{
+  display:none;
+}
+
+.slider{
+  position:absolute;
+  inset:0;
+  border-radius:20px;
+  background:var(--text-faint);
+  cursor:pointer;
+  transition:.25s;
+}
+
+.slider:before{
+  content:"";
+  position:absolute;
+  width:19px;
+  height:19px;
+  left:3px;
+  top:3px;
+  background:white;
+  border-radius:50%;
+  transition:.25s;
+}
+
+.switch input:checked + .slider{
+  background:var(--brass-bright);
+}
+
+.switch input:checked + .slider:before{
+  transform:translateX(21px);
+}
+
+.danger-btn{
+  width:100%;
+  padding:13px;
+  border-radius:10px;
+  border:1px solid var(--negative);
+  background:transparent;
+  color:var(--negative);
+  cursor:pointer;
+  font-weight:600;
+}
+
+.account-status{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  color:var(--text-secondary);
+  font-size:.8rem;
+}
+
+.status-dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:var(--positive);
+}
+
+@keyframes fadeIn{
+  from{
+    opacity:0;
+    transform:translateY(8px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+@media(max-width:600px){
+  .settings-page{
+    width:100%;
+  }
+}
+</style>
+
+
+<div class="settings-head">
+  <h1>Settings</h1>
+  <p>Manage your Apex Ventures account and preferences.</p>
+</div>
+
+
+<!-- ACCOUNT -->
+
+<div class="settings-card">
+
+  <div class="card-title">
+    Account Information
+  </div>
+
+  <div class="field">
+    <label>Full Name</label>
+
+    <input
+      id="name"
+      type="text"
+      placeholder="Loading..."
+    >
+  </div>
+
+
+  <div class="field">
+    <label>Email Address</label>
+
+    <input
+      id="email"
+      type="email"
+      placeholder="Loading..."
+      disabled
+    >
+  </div>
+
+
+  <div class="field">
+    <label>Phone Number</label>
+
+    <input
+      id="phone"
+      type="tel"
+      placeholder="07XXXXXXXX"
+    >
+  </div>
+
+
+  <button
+    class="save-btn"
+    id="saveProfile"
+  >
+    Save Changes
+  </button>
+
+</div>
+
+
+<!-- APPEARANCE -->
+
+<div class="settings-card">
+
+  <div class="card-title">
+    Appearance
+  </div>
+
+  <div class="setting-row">
+
+    <div class="setting-info">
+      <strong>Theme</strong>
+      <span>Choose how Apex Ventures looks.</span>
+    </div>
+
+    <select id="themeSelect"
+      style="
+      padding:8px;
+      border-radius:8px;
+      background:var(--bg-elevated);
+      color:var(--text-primary);
+      border:1px solid var(--panel-border);
+      ">
+
+      <option value="default">Navy</option>
+      <option value="dark">Dark</option>
+      <option value="light">Light</option>
+
+    </select>
+
+  </div>
+
+</div>
+
+
+<!-- NOTIFICATIONS -->
+
+<div class="settings-card">
+
+  <div class="card-title">
+    Notifications
+  </div>
+
+  <div class="setting-row">
+
+    <div class="setting-info">
+      <strong>Transaction Alerts</strong>
+      <span>Receive updates about deposits and withdrawals.</span>
+    </div>
+
+    <label class="switch">
+
+      <input
+        type="checkbox"
+        id="transactionAlerts"
+        checked
+      >
+
+      <span class="slider"></span>
+
+    </label>
+
+  </div>
+
+
+  <div class="setting-row">
+
+    <div class="setting-info">
+      <strong>Investment Updates</strong>
+      <span>Receive updates about your investments.</span>
+    </div>
+
+    <label class="switch">
+
+      <input
+        type="checkbox"
+        id="investmentAlerts"
+        checked
+      >
+
+      <span class="slider"></span>
+
+    </label>
+
+  </div>
+
+</div>
+
+
+<!-- SECURITY -->
+
+<div class="settings-card">
+
+  <div class="card-title">
+    Security
+  </div>
+
+  <div class="setting-row">
+
+    <div class="setting-info">
+      <strong>Account Status</strong>
+      <span>Your current login session.</span>
+    </div>
+
+    <div class="account-status">
+      <span class="status-dot"></span>
+      Secure
+    </div>
+
+  </div>
+
+
+  <div style="margin-top:18px">
+
+    <button
+      class="danger-btn"
+      id="logoutAll"
+    >
+      Log Out
+    </button>
+
+  </div>
+
+</div>
+
+
+<script>
+(async function(){
+
+  const api = window.Apex?.apiFetch;
+
+  if(!api){
+    console.error("Apex API helper is missing.");
+    return;
+  }
+
+
+  const nameEl =
+    document.getElementById("name");
+
+  const emailEl =
+    document.getElementById("email");
+
+  const phoneEl =
+    document.getElementById("phone");
+
+  const saveBtn =
+    document.getElementById("saveProfile");
+
+  const themeSelect =
+    document.getElementById("themeSelect");
+
+  const transactionAlerts =
+    document.getElementById("transactionAlerts");
+
+  const investmentAlerts =
+    document.getElementById("investmentAlerts");
+
+
+  function notify(message,error=false){
+
+    if(window.Apex?.showToast){
+
+      window.Apex.showToast(
+        message,
+        error
+      );
+
+    }else{
+
+      alert(message);
+
+    }
+
+  }
+
+
+  /* ==========================
+     LOAD PROFILE
+  ========================== */
+
+  async function loadProfile(){
+
+    try{
+
+      const data =
+        await api("/auth/me");
+
+      const user =
+        data.user ||
+        data.data ||
+        data;
+
+      nameEl.value =
+        user.name ||
+        user.fullName ||
+        "";
+
+      emailEl.value =
+        user.email ||
+        "";
+
+      phoneEl.value =
+        user.phone ||
+        user.phoneNumber ||
+        "";
+
+    }catch(error){
+
+      console.error(
+        "Profile loading error:",
+        error
+      );
+
+      notify(
+        "Unable to load account information.",
+        true
+      );
+
+    }
+
+  }
+
+
+  /* ==========================
+     SAVE PROFILE
+  ========================== */
+
+  saveBtn.addEventListener(
+    "click",
+    async()=>{
+
+      const name =
+        nameEl.value.trim();
+
+      const phone =
+        phoneEl.value.trim();
+
+
+      if(!name){
+
+        notify(
+          "Enter your full name.",
+          true
+        );
+
+        return;
+
+      }
+
+
+      saveBtn.disabled = true;
+
+      saveBtn.textContent =
+        "Saving...";
+
+
+      try{
+
+        const result =
+          await api(
+            "/profile",
+            {
+              method:"PUT",
+
+              body:JSON.stringify({
+
+                name:name,
+                phone:phone
+
+              })
+            }
+          );
+
+
+        notify(
+          result.message ||
+          "Profile updated successfully."
+        );
+
+
+      }catch(error){
+
+        console.error(error);
+
+        notify(
+          error.message ||
+          "Unable to update profile.",
+          true
+        );
+
+      }finally{
+
+        saveBtn.disabled = false;
+
+        saveBtn.textContent =
+          "Save Changes";
+
+      }
+
+    }
+  );
+
+
+  /* ==========================
+     THEME
+  ========================== */
+
+  const savedTheme =
+    localStorage.getItem("apex-theme") ||
+    "default";
+
+  themeSelect.value =
+    savedTheme;
+
+
+  themeSelect.addEventListener(
+    "change",
+    ()=>{
+
+      const theme =
+        themeSelect.value;
+
+      document.documentElement
+        .setAttribute(
+          "data-theme",
+          theme
+        );
+
+      localStorage.setItem(
+        "apex-theme",
+        theme
+      );
+
+      /*
+        Also update the dashboard
+        theme buttons if they exist.
+      */
+
+      document
+        .querySelectorAll(
+          "[data-theme-btn]"
+        )
+        .forEach(btn=>{
+
+          btn.classList.toggle(
+            "active",
+            btn.dataset.themeBtn === theme
+          );
+
+        });
+
+    }
+  );
+
+
+  /* ==========================
+     NOTIFICATION PREFERENCES
+  ========================== */
+
+  async function savePreferences(){
+
+    try{
+
+      await api(
+        "/profile/preferences",
+        {
+          method:"PUT",
+
+          body:JSON.stringify({
+
+            transactionAlerts:
+              transactionAlerts.checked,
+
+            investmentAlerts:
+              investmentAlerts.checked
+
+          })
+        }
+      );
+
+    }catch(error){
+
+      console.error(
+        "Preferences error:",
+        error
+      );
+
+    }
+
+  }
+
+
+  transactionAlerts.addEventListener(
+    "change",
+    savePreferences
+  );
+
+  investmentAlerts.addEventListener(
+    "change",
+    savePreferences
+  );
+
+
+  /* ==========================
+     LOGOUT
+  ========================== */
+
+  document
+    .getElementById("logoutAll")
+    .addEventListener(
+      "click",
+      async()=>{
+
+        if(
+          !confirm(
+            "Log out of Apex Ventures?"
+          )
+        ){
+
+          return;
+
+        }
+
+
+        try{
+
+          await api(
+            "/auth/logout",
+            {
+              method:"POST"
+            }
+          );
+
+        }catch(error){
+
+          console.warn(
+            "Server logout failed:",
+            error
+          );
+
+        }finally{
+
+          localStorage.removeItem(
+            window.Apex.config.TOKEN_KEY
+          );
+
+          window.location.href =
+            window.Apex.config.LOGIN_URL;
+
+        }
+
+      }
+    );
+
+
+  await loadProfile();
+
+})();
+</script>
+
+  </section>
