@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="default">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apex Ventures — Confirming Payment</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root[data-theme="default"]{
+    --bg:#0b1b34; --bg-card:#122548; --panel-border:rgba(198,164,92,0.18);
+    --text-primary:#f3ede0; --text-secondary:#9fb0c9; --text-faint:#5f7291;
+    --brass:#c6a45c; --brass-bright:#e0bd76; --navy-deep:#08152a;
+    --positive:#5fb98a; --negative:#d97a6c;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{
+    font-family:'IBM Plex Sans', sans-serif; background:var(--bg); color:var(--text-primary);
+    min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;
+  }
+  .card{
+    background:var(--bg-card); border:1px solid var(--panel-border); border-radius:14px;
+    padding:40px 32px; max-width:420px; width:100%; text-align:center;
+  }
+  .brand{ font-family:'Fraunces', serif; font-size:1.1rem; color:var(--brass-bright); margin-bottom:28px; display:flex; align-items:center; justify-content:center; gap:8px; }
+  .brand-mark{ width:9px; height:9px; border-radius:50%; background:var(--brass-bright); box-shadow:0 0 10px var(--brass-bright); }
+
+  .icon{ width:56px; height:56px; border-radius:50%; margin:0 auto 20px; display:flex; align-items:center; justify-content:center; font-size:1.6rem; }
+  .icon.pending{ background:rgba(198,164,92,0.12); color:var(--brass-bright); }
+  .icon.success{ background:rgba(95,185,138,0.12); color:var(--positive); }
+  .icon.failed{ background:rgba(217,122,108,0.12); color:var(--negative); }
+
+  .spinner{ width:22px; height:22px; border-radius:50%; border:3px solid var(--panel-border); border-top-color:var(--brass-bright); animation:spin .8s linear infinite; }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  h1{ font-family:'Fraunces', serif; font-size:1.4rem; margin-bottom:10px; }
+  p{ color:var(--text-secondary); font-size:.92rem; line-height:1.5; margin-bottom:6px; }
+  .ref{ font-family:'IBM Plex Mono', monospace; font-size:.78rem; color:var(--text-faint); margin-top:14px; }
+
+  .btn{
+    display:inline-block; margin-top:24px; padding:12px 26px; border-radius:8px; border:none;
+    background:var(--brass); color:var(--navy-deep); font-weight:600; font-size:.9rem; cursor:pointer;
+    text-decoration:none; transition:background .2s ease;
+  }
+  .btn:hover{ background:var(--brass-bright); }
+  .btn-outline{ background:transparent; border:1px solid var(--panel-border); color:var(--text-primary); margin-left:10px; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="brand"><span class="brand-mark"></span>Apex Ventures</div>
+
+  <div class="icon pending" id="statusIcon"><div class="spinner"></div></div>
+  <h1 id="statusTitle">Confirming your payment…</h1>
+  <p id="statusMessage">Hold on while we verify your Pesapal transaction. This usually takes a few seconds.</p>
+  <div class="ref" id="statusRef"></div>
+
+  <div id="actions" style="display:none;">
+    <a class="btn" id="continueBtn" href="./Dashboard.html#home">Go to dashboard</a>
+    <a class="btn btn-outline" id="retryBtn" href="./Dashboard.html#deposit">Try again</a>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   CONFIG — match Dashboard.html's APEX_CONFIG
+   ========================================================= */
+const API_BASE = "https://api.apexventures.example/v1";
+const TOKEN_KEY = "apex_token";
+
+/* Pesapal appends these to the callback URL after payment.
+   Adjust param names to whatever your Pesapal integration actually sends
+   (commonly OrderTrackingId / OrderMerchantReference). */
+const params = new URLSearchParams(window.location.search);
+const trackingId = params.get("OrderTrackingId") || params.get("orderTrackingId");
+const merchantRef = params.get("OrderMerchantReference") || params.get("orderMerchantReference");
+
+const iconEl = document.getElementById("statusIcon");
+const titleEl = document.getElementById("statusTitle");
+const messageEl = document.getElementById("statusMessage");
+const refEl = document.getElementById("statusRef");
+const actionsEl = document.getElementById("actions");
+
+function renderResult(status, reference, amount) {
+  actionsEl.style.display = "block";
+
+  if (status === "completed") {
+    iconEl.className = "icon success";
+    iconEl.textContent = "✓";
+    titleEl.textContent = "Payment received";
+    messageEl.textContent = amount
+      ? `Your deposit of KES ${Number(amount).toLocaleString()} has been added to your wallet.`
+      : "Your deposit has been added to your wallet.";
+    document.getElementById("retryBtn").style.display = "none";
+  } else if (status === "pending") {
+    iconEl.className = "icon pending";
+    iconEl.textContent = "…";
+    titleEl.textContent = "Payment still processing";
+    messageEl.textContent = "Pesapal hasn't confirmed this payment yet. It should reflect in your wallet shortly — check back in a minute.";
+    document.getElementById("retryBtn").style.display = "none";
+  } else {
+    iconEl.className = "icon failed";
+    iconEl.textContent = "✕";
+    titleEl.textContent = "Payment not completed";
+    messageEl.textContent = "This transaction was cancelled or failed. No funds were deducted.";
+  }
+
+  refEl.textContent = reference ? `Reference: ${reference}` : "";
+}
+
+async function verify() {
+  if (!trackingId) {
+    renderResult("failed", merchantRef);
+    messageEl.textContent = "We couldn't find a transaction reference in this link.";
+    return;
+  }
+
+  try {
+    const token = localStorage.getItem(TOKEN_KEY);
+    const res = await fetch(`${API_BASE}/wallet/deposit/pesapal/verify?orderTrackingId=${encodeURIComponent(trackingId)}`, {
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      }
+    });
+
+    if (!res.ok) throw new Error("verify-failed");
+    const data = await res.json();
+    // Expected response: { status: "completed"|"pending"|"failed", reference, amount }
+    renderResult(data.status, data.reference || merchantRef, data.amount);
+  } catch (err) {
+    renderResult("pending", merchantRef);
+    messageEl.textContent = "We're still checking with Pesapal. Refresh this page in a moment, or check your dashboard.";
+  }
+}
+
+verify();
+</script>
+
+</body>
+</html>
+
