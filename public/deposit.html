@@ -1,0 +1,125 @@
+<style>
+  .page h1{ font-size:1.8rem; margin-bottom:6px; }
+  .page-sub{ color:var(--text-secondary); margin-bottom:26px; font-size:.95rem; }
+  .panel{ background:var(--bg-card); border:1px solid var(--panel-border); border-radius:12px; padding:24px; margin-bottom:20px; }
+  .tab-row{ display:flex; gap:8px; margin-bottom:18px; }
+  .tab-btn{ padding:9px 16px; border-radius:20px; border:1px solid var(--panel-border); background:transparent; color:var(--text-secondary); cursor:pointer; font-size:.85rem; }
+  .tab-btn.active{ background:var(--brass); color:var(--navy-deep); border-color:var(--brass); }
+  .method-hint{ font-size:.8rem; color:var(--text-faint); margin-bottom:16px; }
+  .form-row{ display:flex; gap:12px; flex-wrap:wrap; margin-bottom:14px; }
+  .form-field{ flex:1; min-width:160px; }
+  .form-field label{ display:block; font-size:.78rem; color:var(--text-secondary); margin-bottom:6px; }
+  .form-field input{ width:100%; padding:11px 12px; border-radius:8px; background:var(--bg-elevated); border:1px solid var(--panel-border); color:var(--text-primary); font-size:.92rem; font-family:'IBM Plex Sans', sans-serif; }
+  .btn{ padding:11px 20px; border-radius:8px; border:none; cursor:pointer; background:var(--brass); color:var(--navy-deep); font-weight:600; font-size:.9rem; }
+  .btn:hover{ background:var(--brass-bright); }
+  .btn:disabled{ opacity:.6; cursor:not-allowed; }
+  .status-line{ font-size:.85rem; margin-top:12px; }
+  .status-line.pending{ color:var(--text-secondary); }
+  .status-line.success{ color:var(--positive); }
+  .status-line.error{ color:var(--negative); }
+</style>
+
+<section class="page">
+  <h1>Deposit</h1>
+  <p class="page-sub">Top up your wallet using M-Pesa or Pesapal.</p>
+
+  <div class="panel">
+    <div class="tab-row">
+      <button class="tab-btn active" data-method="mpesa">M-Pesa</button>
+      <button class="tab-btn" data-method="pesapal">Pesapal</button>
+    </div>
+
+    <p class="method-hint" id="methodHint">You'll get an STK push on your phone to approve.</p>
+
+    <form id="depositForm">
+      <div class="form-row">
+        <div class="form-field" id="phoneField">
+          <label>M-Pesa phone number</label>
+          <input type="tel" id="depositPhone" placeholder="07XX XXX XXX" required>
+        </div>
+        <div class="form-field">
+          <label>Amount (KES)</label>
+          <input type="number" id="depositAmount" placeholder="1,000" min="1" required>
+        </div>
+      </div>
+      <button class="btn" type="submit" id="depositSubmit">Deposit funds</button>
+      <div class="status-line" id="depositStatus"></div>
+    </form>
+  </div>
+</section>
+
+<script>
+(() => {
+  const { apiFetch, showToast } = window.Apex;
+  let method = "mpesa";
+
+  const hints = {
+    mpesa: "You'll get an STK push on your phone to approve.",
+    pesapal: "You'll be redirected to Pesapal to complete payment."
+  };
+
+  document.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      method = btn.dataset.method;
+      document.getElementById("phoneField").style.display = method === "mpesa" ? "block" : "none";
+      document.getElementById("methodHint").textContent = hints[method];
+    });
+  });
+
+  document.getElementById("depositForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const submitBtn = document.getElementById("depositSubmit");
+    const status = document.getElementById("depositStatus");
+    const amount = Number(document.getElementById("depositAmount").value);
+    const phone = document.getElementById("depositPhone").value;
+
+    if (!amount || amount <= 0) {
+      status.textContent = "Enter a valid amount.";
+      status.className = "status-line error";
+      return;
+    }
+    if (method === "mpesa" && !phone) {
+      status.textContent = "Enter your M-Pesa phone number.";
+      status.className = "status-line error";
+      return;
+    }
+
+    submitBtn.disabled = true;
+    status.textContent = method === "mpesa" ? "Sending STK push to your phone…" : "Redirecting to Pesapal…";
+    status.className = "status-line pending";
+
+    try {
+      // POST /wallet/deposit — body: { method, amount, phone? }
+      // mpesa   -> triggers Daraja STK push, returns { status: "pending", reference }
+      // pesapal -> creates a Pesapal order, returns { redirectUrl }
+      const res = await apiFetch("/wallet/deposit", {
+        method: "POST",
+        body: JSON.stringify({
+          method,
+          amount,
+          phone: method === "mpesa" ? phone : undefined
+        })
+      });
+
+      if (res.redirectUrl) {
+        window.location.href = res.redirectUrl;
+        return;
+      }
+
+      status.textContent = `Request sent. Reference: ${res.reference || "—"}. Check your phone to complete payment.`;
+      status.className = "status-line success";
+      showToast("Deposit request sent");
+      document.getElementById("depositForm").reset();
+    } catch (err) {
+      status.textContent = err.message || "Deposit failed. Try again.";
+      status.className = "status-line error";
+      showToast(err.message || "Deposit failed", true);
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
+})();
+</script>
+
