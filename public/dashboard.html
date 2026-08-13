@@ -1,0 +1,1516 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="default">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Apex Ventures — Dashboard</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root[data-theme="default"]{
+--bg:#0b1b34;
+--bg-elevated:#0f2140;
+--bg-card:#122548;
+--border:rgba(198,164,92,.18);
+--text:#f3ede0;
+--muted:#9fb0c9;
+--faint:#5f7291;
+--gold:#c6a45c;
+--gold2:#e0bd76;
+--deep:#08152a;
+--green:#5fb98a;
+--red:#d97a6c;
+--overlay:rgba(4,10,22,.65);
+}
+
+:root[data-theme="dark"]{
+--bg:#05070c;
+--bg-elevated:#0a0d14;
+--bg-card:#0e121b;
+--border:rgba(198,164,92,.14);
+--text:#eceef2;
+--muted:#8992a3;
+--faint:#4d5566;
+--gold:#c6a45c;
+--gold2:#e0bd76;
+--deep:#000103;
+--green:#57a67d;
+--red:#c76a5d;
+--overlay:rgba(0,0,0,.75);
+}
+
+:root[data-theme="light"]{
+--bg:#f4f1e8;
+--bg-elevated:#fff;
+--bg-card:#fff;
+--border:rgba(11,27,52,.1);
+--text:#0b1b34;
+--muted:#4a5670;
+--faint:#8894ac;
+--gold:#a3813d;
+--gold2:#8a6a2f;
+--deep:#0b1b34;
+--green:#2f8f5f;
+--red:#c1503f;
+--overlay:rgba(11,27,52,.35);
+}
+
+*{
+box-sizing:border-box;
+margin:0;
+padding:0;
+}
+
+body{
+font-family:'IBM Plex Sans',sans-serif;
+background:var(--bg);
+color:var(--text);
+min-height:100vh;
+transition:.3s;
+}
+
+h1,h2,h3,.brand{
+font-family:'Fraunces',serif;
+}
+
+.mono{
+font-family:'IBM Plex Mono',monospace;
+}
+
+/* TOPBAR */
+
+.topbar{
+height:76px;
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:0 24px;
+background:var(--bg-elevated);
+border-bottom:1px solid var(--border);
+position:sticky;
+top:0;
+z-index:40;
+}
+
+.brand{
+font-size:1.3rem;
+font-weight:600;
+display:flex;
+align-items:center;
+gap:9px;
+}
+
+.brand-mark{
+width:10px;
+height:10px;
+border-radius:50%;
+background:var(--gold2);
+box-shadow:0 0 12px var(--gold2);
+}
+
+.hamburger{
+width:42px;
+height:42px;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+gap:5px;
+background:transparent;
+border:1px solid var(--border);
+border-radius:9px;
+cursor:pointer;
+}
+
+.hamburger span{
+width:20px;
+height:2px;
+background:var(--text);
+transition:.3s;
+}
+
+.hamburger.open span:nth-child(1){
+transform:translateY(7px) rotate(45deg);
+}
+
+.hamburger.open span:nth-child(2){
+opacity:0;
+}
+
+.hamburger.open span:nth-child(3){
+transform:translateY(-7px) rotate(-45deg);
+}
+
+.user-chip{
+display:flex;
+align-items:center;
+gap:8px;
+font-size:.82rem;
+color:var(--muted);
+}
+
+.user-dot{
+width:8px;
+height:8px;
+border-radius:50%;
+background:var(--green);
+}
+
+/* DRAWER */
+
+.overlay{
+position:fixed;
+inset:0;
+background:var(--overlay);
+opacity:0;
+pointer-events:none;
+transition:.3s;
+z-index:45;
+}
+
+.overlay.show{
+opacity:1;
+pointer-events:auto;
+}
+
+.drawer{
+position:fixed;
+top:0;
+left:0;
+height:100%;
+width:285px;
+background:var(--deep);
+border-right:1px solid var(--border);
+transform:translateX(-100%);
+transition:.35s;
+z-index:50;
+display:flex;
+flex-direction:column;
+padding:24px 0;
+}
+
+.drawer.open{
+transform:translateX(0);
+}
+
+.drawer-header{
+padding:0 22px 20px;
+border-bottom:1px solid var(--border);
+margin-bottom:12px;
+}
+
+.drawer-header .brand{
+color:var(--gold2);
+}
+
+.drawer-sub{
+font-size:.7rem;
+color:var(--faint);
+margin-top:5px;
+text-transform:uppercase;
+letter-spacing:.08em;
+}
+
+.nav-list{
+list-style:none;
+flex:1;
+overflow-y:auto;
+}
+
+.nav-item{
+display:flex;
+align-items:center;
+gap:14px;
+padding:13px 22px;
+color:var(--muted);
+cursor:pointer;
+border-left:3px solid transparent;
+transition:.2s;
+font-size:.94rem;
+}
+
+.nav-item:hover{
+background:rgba(198,164,92,.06);
+color:var(--text);
+}
+
+.nav-item.active{
+color:var(--gold2);
+border-left-color:var(--gold2);
+background:rgba(198,164,92,.08);
+}
+
+.nav-icon{
+width:20px;
+text-align:center;
+}
+
+.nav-divider{
+height:1px;
+background:var(--border);
+margin:14px 22px;
+}
+
+.nav-group-label{
+padding:6px 22px;
+font-size:.67rem;
+letter-spacing:.1em;
+text-transform:uppercase;
+color:var(--faint);
+}
+
+.drawer-footer{
+padding:16px 22px 4px;
+border-top:1px solid var(--border);
+}
+
+.theme-row{
+display:flex;
+gap:7px;
+margin-bottom:14px;
+}
+
+.theme-btn{
+flex:1;
+padding:8px 0;
+border-radius:8px;
+border:1px solid var(--border);
+background:var(--bg-card);
+color:var(--muted);
+cursor:pointer;
+font-size:.72rem;
+font-family:'IBM Plex Mono',monospace;
+}
+
+.theme-btn.active{
+border-color:var(--gold2);
+color:var(--gold2);
+}
+
+.logout-btn{
+width:100%;
+padding:11px;
+border-radius:8px;
+background:transparent;
+border:1px solid var(--red);
+color:var(--red);
+cursor:pointer;
+font-weight:500;
+}
+
+/* MAIN */
+
+main{
+max-width:1100px;
+margin:auto;
+padding:30px 24px 60px;
+}
+
+.page{
+animation:fade .25s ease;
+}
+
+@keyframes fade{
+from{
+opacity:0;
+transform:translateY(8px);
+}
+to{
+opacity:1;
+transform:none;
+}
+}
+
+.page-title{
+margin-bottom:5px;
+font-size:1.9rem;
+}
+
+.page-subtitle{
+color:var(--muted);
+font-size:.9rem;
+margin-bottom:25px;
+}
+
+/* CARDS */
+
+.grid{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:15px;
+}
+
+.card{
+background:var(--bg-card);
+border:1px solid var(--border);
+border-radius:15px;
+padding:20px;
+}
+
+.card-label{
+font-size:.75rem;
+color:var(--muted);
+margin-bottom:10px;
+}
+
+.card-value{
+font-size:1.45rem;
+font-family:'IBM Plex Mono',monospace;
+}
+
+.card-value.gold{
+color:var(--gold2);
+}
+
+.card-value.green{
+color:var(--green);
+}
+
+/* ACTIONS */
+
+.actions{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:12px;
+margin-top:20px;
+}
+
+.action{
+padding:16px;
+border:1px solid var(--border);
+border-radius:12px;
+background:var(--bg-card);
+color:var(--text);
+cursor:pointer;
+text-align:left;
+transition:.2s;
+}
+
+.action:hover{
+border-color:var(--gold);
+transform:translateY(-2px);
+}
+
+.action strong{
+display:block;
+margin-bottom:5px;
+}
+
+.action span{
+font-size:.78rem;
+color:var(--muted);
+}
+
+/* TABLE */
+
+.table-wrap{
+overflow-x:auto;
+margin-top:20px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+min-width:650px;
+}
+
+th,td{
+padding:13px 12px;
+border-bottom:1px solid var(--border);
+text-align:left;
+font-size:.82rem;
+}
+
+th{
+color:var(--muted);
+font-weight:500;
+}
+
+.status{
+display:inline-block;
+padding:5px 9px;
+border-radius:20px;
+font-size:.7rem;
+}
+
+.status.success{
+background:rgba(95,185,138,.1);
+color:var(--green);
+}
+
+.status.pending{
+background:rgba(198,164,92,.1);
+color:var(--gold2);
+}
+
+/* FORM */
+
+.form{
+max-width:500px;
+}
+
+.field{
+margin-bottom:16px;
+}
+
+.field label{
+display:block;
+font-size:.78rem;
+color:var(--muted);
+margin-bottom:7px;
+}
+
+.field input,
+.field select{
+width:100%;
+padding:13px;
+border-radius:10px;
+border:1px solid var(--border);
+background:var(--bg-card);
+color:var(--text);
+outline:none;
+}
+
+.field input:focus,
+.field select:focus{
+border-color:var(--gold);
+}
+
+.primary{
+width:100%;
+padding:13px;
+border:0;
+border-radius:10px;
+background:linear-gradient(135deg,var(--gold2),var(--gold));
+color:#08152a;
+font-weight:600;
+cursor:pointer;
+}
+
+.primary:disabled{
+opacity:.5;
+}
+
+/* INVESTMENT */
+
+.plan-grid{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:15px;
+}
+
+.plan{
+background:var(--bg-card);
+border:1px solid var(--border);
+border-radius:15px;
+padding:20px;
+position:relative;
+}
+
+.plan.featured{
+border-color:var(--gold);
+}
+
+.badge{
+position:absolute;
+top:14px;
+right:14px;
+font-size:.65rem;
+color:var(--gold2);
+border:1px solid var(--gold);
+padding:4px 7px;
+border-radius:20px;
+}
+
+.plan h3{
+margin-bottom:14px;
+}
+
+.plan .amount{
+font-size:1.4rem;
+font-family:'IBM Plex Mono',monospace;
+color:var(--gold2);
+margin-bottom:8px;
+}
+
+.plan p{
+font-size:.78rem;
+color:var(--muted);
+margin-bottom:7px;
+}
+
+.plan button{
+width:100%;
+margin-top:15px;
+padding:11px;
+border:1px solid var(--gold);
+border-radius:9px;
+background:transparent;
+color:var(--gold2);
+cursor:pointer;
+}
+
+.plan button:hover{
+background:var(--gold);
+color:#08152a;
+}
+
+/* MESSAGE */
+
+.message{
+padding:13px;
+border-radius:10px;
+margin-bottom:18px;
+font-size:.8rem;
+display:none;
+}
+
+.message.show{
+display:block;
+}
+
+.message.error{
+background:rgba(217,122,108,.1);
+color:var(--red);
+}
+
+.message.success{
+background:rgba(95,185,138,.1);
+color:var(--green);
+}
+
+.empty{
+text-align:center;
+padding:35px;
+color:var(--faint);
+}
+
+/* RESPONSIVE */
+
+@media(max-width:750px){
+
+.grid{
+grid-template-columns:1fr;
+}
+
+.plan-grid{
+grid-template-columns:1fr;
+}
+
+.actions{
+grid-template-columns:1fr;
+}
+
+main{
+padding:22px 16px 50px;
+}
+
+.topbar{
+padding:0 16px;
+}
+
+.user-chip span:last-child{
+max-width:100px;
+overflow:hidden;
+text-overflow:ellipsis;
+white-space:nowrap;
+}
+
+}
+
+@media(max-width:430px){
+
+.drawer{
+width:82%;
+}
+
+.page-title{
+font-size:1.55rem;
+}
+
+.card{
+padding:17px;
+}
+
+}
+</style>
+</head>
+
+<body>
+
+<!-- TOP BAR -->
+<header class="topbar">
+
+<button class="hamburger" id="hamburger">
+<span></span>
+<span></span>
+<span></span>
+</button>
+
+<div class="brand">
+<span class="brand-mark"></span>
+Apex Ventures
+</div>
+
+<div class="user-chip">
+<span class="user-dot"></span>
+<span id="userLabel">Account</span>
+</div>
+
+</header>
+
+
+<!-- OVERLAY -->
+<div class="overlay" id="overlay"></div>
+
+
+<!-- DRAWER -->
+<nav class="drawer" id="drawer">
+
+<div class="drawer-header">
+
+<div class="brand">
+<span class="brand-mark"></span>
+Apex
+</div>
+
+<div class="drawer-sub">
+Investor Portal
+</div>
+
+</div>
+
+
+<ul class="nav-list">
+
+<li class="nav-item active" data-page="home">
+<span class="nav-icon">⌂</span>
+Home
+</li>
+
+<li class="nav-item" data-page="overview">
+<span class="nav-icon">▤</span>
+Dashboard
+</li>
+
+<li class="nav-item" data-page="surveys">
+<span class="nav-icon">✎</span>
+Surveys
+</li>
+
+
+<div class="nav-divider"></div>
+
+<div class="nav-group-label">
+Wallet
+</div>
+
+<li class="nav-item" data-page="deposit">
+<span class="nav-icon">↓</span>
+Deposit
+</li>
+
+<li class="nav-item" data-page="withdrawal">
+<span class="nav-icon">↑</span>
+Withdrawal
+</li>
+
+
+<div class="nav-divider"></div>
+
+<div class="nav-group-label">
+Grow
+</div>
+
+<li class="nav-item" data-page="invest">
+<span class="nav-icon">◈</span>
+Invest
+</li>
+
+<li class="nav-item" data-page="loan">
+<span class="nav-icon">⌘</span>
+Borrow / Loan
+</li>
+
+
+<div class="nav-divider"></div>
+
+<li class="nav-item" data-page="settings">
+<span class="nav-icon">⚙</span>
+Settings
+</li>
+
+</ul>
+
+
+<div class="drawer-footer">
+
+<div class="theme-row">
+
+<button class="theme-btn active" data-theme="default">
+Navy
+</button>
+
+<button class="theme-btn" data-theme="dark">
+Dark
+</button>
+
+<button class="theme-btn" data-theme="light">
+Light
+</button>
+
+</div>
+
+<button class="logout-btn" id="logout">
+⏻ Log out
+</button>
+
+</div>
+
+</nav>
+
+
+<!-- CONTENT -->
+<main id="content"></main>
+
+
+<script>
+
+/* =========================================================
+   APEX CONFIG
+   Same-domain API.
+   No fake api.apexventures.example URL.
+========================================================= */
+
+const CONFIG = {
+
+    API_BASE: "/api",
+
+    TOKEN_KEY: "apex_token",
+
+    LOGIN_URL: "./login.html"
+
+};
+
+
+/* =========================================================
+   API HELPER
+========================================================= */
+
+async function apiFetch(
+    path,
+    options = {}
+){
+
+    const token =
+        localStorage.getItem(
+            CONFIG.TOKEN_KEY
+        );
+
+
+    const headers = {
+
+        "Content-Type":
+            "application/json",
+
+        ...(options.headers || {})
+
+    };
+
+
+    if(token){
+
+        headers.Authorization =
+            `Bearer ${token}`;
+
+    }
+
+
+    const response =
+        await fetch(
+            `${CONFIG.API_BASE}${path}`,
+            {
+                ...options,
+                headers
+            }
+        );
+
+
+    if(
+        response.status === 401 ||
+        response.status === 403
+    ){
+
+        localStorage.removeItem(
+            CONFIG.TOKEN_KEY
+        );
+
+        window.location.href =
+            CONFIG.LOGIN_URL;
+
+        throw new Error(
+            "Session expired"
+        );
+
+    }
+
+
+    let data = null;
+
+    const contentType =
+        response.headers.get(
+            "content-type"
+        );
+
+
+    if(
+        contentType &&
+        contentType.includes(
+            "application/json"
+        )
+    ){
+
+        data =
+            await response.json();
+
+    }
+
+
+    if(!response.ok){
+
+        throw new Error(
+            data?.message ||
+            data?.error ||
+            `Request failed (${response.status})`
+        );
+
+    }
+
+
+    return data;
+
+}
+
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+function money(
+    amount
+){
+
+    return `KES ${
+        Number(amount || 0)
+        .toLocaleString(
+            "en-KE",
+            {
+                minimumFractionDigits:2
+            }
+        )
+    }`;
+
+}
+
+
+function toast(
+    message
+){
+
+    alert(message);
+
+}
+
+
+/* =========================================================
+   DRAWER
+========================================================= */
+
+const drawer =
+    document.getElementById(
+        "drawer"
+    );
+
+const overlay =
+    document.getElementById(
+        "overlay"
+    );
+
+const hamburger =
+    document.getElementById(
+        "hamburger"
+    );
+
+
+function openMenu(){
+
+    drawer.classList.add(
+        "open"
+    );
+
+    overlay.classList.add(
+        "show"
+    );
+
+    hamburger.classList.add(
+        "open"
+    );
+
+}
+
+
+function closeMenu(){
+
+    drawer.classList.remove(
+        "open"
+    );
+
+    overlay.classList.remove(
+        "show"
+    );
+
+    hamburger.classList.remove(
+        "open"
+    );
+
+}
+
+
+hamburger.onclick =
+    () => {
+
+        drawer.classList.contains(
+            "open"
+        )
+        ? closeMenu()
+        : openMenu();
+
+    };
+
+
+overlay.onclick =
+    closeMenu;
+
+
+/* =========================================================
+   CONTENT
+   Everything is inside this dashboard.
+   No missing /pages folder.
+========================================================= */
+
+const content =
+    document.getElementById(
+        "content"
+    );
+
+
+function render(page){
+
+    const pages = {
+
+        home: homePage,
+
+        overview: overviewPage,
+
+        surveys: surveysPage,
+
+        deposit: depositPage,
+
+        withdrawal: withdrawalPage,
+
+        invest: investPage,
+
+        loan: loanPage,
+
+        settings: settingsPage
+
+    };
+
+
+    content.innerHTML =
+        (pages[page] || homePage)();
+
+    content
+        .querySelectorAll(
+            "[data-action]"
+        )
+        .forEach(
+            attachActions
+        );
+
+}
+
+
+/* =========================================================
+   HOME
+========================================================= */
+
+function homePage(){
+
+return `
+
+<div class="page">
+
+<h1 class="page-title">
+Welcome to Apex Ventures
+</h1>
+
+<p class="page-subtitle">
+Manage your wallet, investments and account from one place.
+</p>
+
+
+<div class="grid">
+
+<div class="card">
+<div class="card-label">
+Available Balance
+</div>
+<div class="card-value gold" id="homeBalance">
+KES 0.00
+</div>
+</div>
+
+
+<div class="card">
+<div class="card-label">
+Invested
+</div>
+<div class="card-value" id="homeInvested">
+KES 0.00
+</div>
+</div>
+
+
+<div class="card">
+<div class="card-label">
+Investment Growth
+</div>
+<div class="card-value green" id="homeProfit">
+KES 0.00
+</div>
+</div>
+
+</div>
+
+
+<div class="actions">
+
+<button class="action" data-action="deposit">
+<strong>↓ Deposit Funds</strong>
+<span>Add money to your Apex wallet.</span>
+</button>
+
+
+<button class="action" data-action="invest">
+<strong>◈ Start Investing</strong>
+<span>Choose an available investment plan.</span>
+</button>
+
+
+<button class="action" data-action="withdrawal">
+<strong>↑ Withdraw</strong>
+<span>Request a withdrawal from your wallet.</span>
+</button>
+
+
+<button class="action" data-action="overview">
+<strong>▤ View Dashboard</strong>
+<span>Review your account activity.</span>
+</button>
+
+</div>
+
+</div>
+
+`;
+
+}
+
+
+/* =========================================================
+   OVERVIEW
+========================================================= */
+
+function overviewPage(){
+
+return `
+
+<div class="page">
+
+<h1 class="page-title">
+Dashboard
+</h1>
+
+<p class="page-subtitle">
+Your Apex Ventures account overview.
+</p>
+
+
+<div class="grid">
+
+<div class="card">
+<div class="card-label">
+Wallet Balance
+</div>
+<div class="card-value gold">
+KES 0.00
+</div>
+</div>
+
+<div class="card">
+<div class="card-label">
+Total Invested
+</div>
+<div class="card-value">
+KES 0.00
+</div>
+</div>
+
+<div class="card">
+<div class="card-label">
+Total Returns
+</div>
+<div class="card-value green">
+KES 0.00
+</div>
+</div>
+
+</div>
+
+
+<div class="card" style="margin-top:20px">
+
+<h3>Recent Transactions</h3>
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+<tr>
+<th>Date</th>
+<th>Type</th>
+<th>Amount</th>
+<th>Status</th>
+</tr>
+</thead>
+
+<tbody>
+
+<tr>
+<td colspan="4">
+<div class="empty">
+No transactions yet
+</div>
+</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+`;
+
+}
+
+
+/* =========================================================
+   SURVEYS
+========================================================= */
+
+function surveysPage(){
+
+return `
+
+<div class="page">
+
+<h1 class="page-title">
+Surveys
+</h1>
+
+<p class="page-subtitle">
+Complete available surveys and earn rewards.
+</p>
+
+
+<div class="card">
+
+<h3>
+Available Surveys
+</h3>
+
+<div class="empty">
+No surveys available right now.
+</div>
+
+</div>
+
+</div>
+
+`;
+
+}
+
+
+/* =========================================================
+   DEPOSIT
+========================================================= */
+
+function depositPage(){
+
+return `
+
+<div class="page">
+
+<h1 class="page-title">
+Deposit Funds
+</h1>
+
+<p class="page-subtitle">
+Fund your Apex Ventures wallet.
+</p>
+
+
+<div class="card form">
+
+<div id="depositMessage"
+class="message"></div>
+
+
+<div class="field">
+
+<label>
+Amount — KES
+</label>
+
+<input
+type="number"
+id="depositAmount"
+min="1"
+placeholder="Enter amount"
+>
+
+</div>
+
+
+<div class="field">
+
+<label>
+Payment Method
+</label>
+
+<select id="depositMethod">
+
+<option value="paystack">
+Paystack
+</option>
+
+<option value="pesapal">
+Pesapal
+</option>
+
+</select>
+
+</div>
+
+
+<button
+class="primary"
+data-action="processDeposit"
+>
+Continue Deposit
+</button>
+
+</div>
+
+</div>
+
+`;
+
+}
+
+
+/* =========================================================
+   WITHDRAWAL
+========================================================= */
+
+function withdrawalPage(){
+
+return `
+
+<div class="page">
+
+<h1 class="page-title">
+Withdrawal
+</h1>
+
+<p class="page-subtitle">
+Request funds from your available balance.
+</p>
+
+
+<div class="card form">
+
+<div class="field">
+
+<label>
+Amount — KES
+</label>
+
+<input
+type="number"
+id="withdrawAmount"
+min="1"
+placeholder="Enter amount"
+>
+
+</div>
+
+
+<div class="field">
+
+<label>
+M-Pesa Phone Number
+</label>
+
+<input
+type="tel"
+id="withdrawPhone"
+placeholder="07XXXXXXXX"
+>
+
+</div>
+
+
+<button
+class="primary"
+data-action="withdraw"
+>
+Request Withdrawal
+</button>
+
+</div>
+
+</div>
+
+`;
+
+}
+
+
+/* =========================================================
+   INVESTMENT
+========================================================= */
+
+function investPage(){
+
+const plans = [
+
+{
+name:"Starter",
+amount:750,
+profit:210,
+duration:"3 Hours",
+growth:"28%"
+},
+
+{
+name:"Growth",
+amount:1500,
+profit:450,
+duration:"6 Hours",
+growth:"30%"
+},
+
+{
+name:"Premium",
+amount:3000,
+profit:1050,
+duration:"12 Hours",
+growth:"35%"
+},
+
+{
+name:"Elite",
+amount:5000,
+profit:2000,
+duration:"24 Hours",
+growth:"40%"
+},
+
+{
+name:"Executive",
+amount:10000,
+profit:4500,
+duration:"48 Hours",
+growth:"45%"
+},
+
+{
+name:"Apex Plus",
+amount:25000,
+profit:12500,
+duration:"72 Hours",
+growth:"50%"
+}
+
+];
+
+
+return `
+
+<div class="page">
+
+<h1 class="page-title">
+Investment Plans
+</h1>
+
+<p class="page-subtitle">
+Choose a plan that suits your investment goals.
+</p>
+
+
+<div class="plan-grid">
+
+${plans.map(
+(plan,index)=>`
+
+<div class="plan ${
+index === 2
+? "featured"
+: ""
+}">
+
+${index === 2
+? `<span class="badge">POPULAR</span>`
+: ""}
+
+<h3>
+${plan.name}
+</h3>
+
+<div class="amount">
+${money(plan.amount)}
+</div>
+
+<p>
+Projected growth:
+<strong>
+${plan.growth}
+</strong>
+</p>
+
+<p>
+Projected return:
+<strong>
+${money(
+plan.amou
