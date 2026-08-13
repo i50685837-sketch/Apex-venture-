@@ -1,0 +1,406 @@
+<!-- pages/withdrawal.html -->
+<section class="withdraw-page">
+
+<style>
+.withdraw-page{
+  max-width:720px;
+  margin:auto;
+  animation:fadeIn .4s ease;
+}
+.withdraw-head{
+  margin-bottom:22px;
+}
+.withdraw-head h1{
+  font-size:2rem;
+  margin-bottom:6px;
+}
+.withdraw-head p{
+  color:var(--text-secondary);
+}
+
+.balance-card{
+  background:linear-gradient(135deg,var(--bg-card),var(--bg-elevated));
+  border:1px solid var(--panel-border);
+  border-radius:18px;
+  padding:22px;
+  margin-bottom:20px;
+}
+.balance-label{
+  color:var(--text-secondary);
+  font-size:.85rem;
+}
+.balance-value{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:1.8rem;
+  color:var(--brass-bright);
+  margin-top:8px;
+}
+
+.withdraw-card{
+  background:var(--bg-card);
+  border:1px solid var(--panel-border);
+  border-radius:18px;
+  padding:24px;
+}
+.field{
+  margin-bottom:18px;
+}
+.field label{
+  display:block;
+  color:var(--text-secondary);
+  font-size:.85rem;
+  margin-bottom:8px;
+}
+.field input,
+.field select{
+  width:100%;
+  padding:14px;
+  border-radius:10px;
+  border:1px solid var(--panel-border);
+  outline:none;
+  background:var(--bg-elevated);
+  color:var(--text-primary);
+  font-family:inherit;
+}
+.field input:focus,
+.field select:focus{
+  border-color:var(--brass-bright);
+}
+.withdraw-btn{
+  width:100%;
+  border:0;
+  border-radius:11px;
+  padding:15px;
+  cursor:pointer;
+  background:var(--brass-bright);
+  color:#08152a;
+  font-weight:700;
+  font-size:1rem;
+}
+.withdraw-btn:disabled{
+  opacity:.6;
+  cursor:not-allowed;
+}
+.info{
+  margin-top:18px;
+  padding:14px;
+  border-radius:10px;
+  background:rgba(198,164,92,.06);
+  color:var(--text-secondary);
+  font-size:.82rem;
+  line-height:1.5;
+}
+.history{
+  margin-top:24px;
+}
+.history h2{
+  margin-bottom:12px;
+}
+.transaction{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  padding:14px;
+  margin-bottom:9px;
+  background:var(--bg-card);
+  border:1px solid var(--panel-border);
+  border-radius:12px;
+}
+.tx-title{
+  font-weight:600;
+}
+.tx-date{
+  color:var(--text-faint);
+  font-size:.75rem;
+  margin-top:4px;
+}
+.tx-amount{
+  color:var(--negative);
+  font-family:'IBM Plex Mono',monospace;
+  white-space:nowrap;
+}
+.status{
+  font-size:.72rem;
+  margin-top:4px;
+  color:var(--text-secondary);
+}
+.empty{
+  text-align:center;
+  color:var(--text-faint);
+  padding:25px;
+}
+@keyframes fadeIn{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:translateY(0)}
+}
+</style>
+
+<div class="withdraw-head">
+  <h1>Withdraw Funds</h1>
+  <p>Withdraw your available Apex Ventures wallet balance.</p>
+</div>
+
+<div class="balance-card">
+  <div class="balance-label">Available Balance</div>
+  <div class="balance-value" id="availableBalance">KES 0</div>
+</div>
+
+<div class="withdraw-card">
+
+  <div class="field">
+    <label>Withdrawal Method</label>
+    <select id="method">
+      <option value="mpesa">M-PESA</option>
+    </select>
+  </div>
+
+  <div class="field">
+    <label>M-PESA Phone Number</label>
+    <input
+      id="phone"
+      type="tel"
+      placeholder="07XXXXXXXX"
+      autocomplete="tel">
+  </div>
+
+  <div class="field">
+    <label>Amount (KES)</label>
+    <input
+      id="amount"
+      type="number"
+      min="1"
+      step="1"
+      placeholder="Enter amount">
+  </div>
+
+  <button class="withdraw-btn" id="withdrawBtn">
+    Request Withdrawal
+  </button>
+
+  <div class="info">
+    Withdrawals are submitted to the backend for processing.
+    Make sure your M-PESA number and amount are correct before submitting.
+  </div>
+
+</div>
+
+<div class="history">
+  <h2>Withdrawal History</h2>
+  <div id="history">
+    <div class="empty">Loading transactions...</div>
+  </div>
+</div>
+
+<script>
+(async function(){
+
+  const api = window.Apex?.apiFetch;
+
+  if(!api){
+    console.error("Apex API helper is missing.");
+    return;
+  }
+
+  const balanceEl = document.getElementById("availableBalance");
+  const amountEl = document.getElementById("amount");
+  const phoneEl = document.getElementById("phone");
+  const button = document.getElementById("withdrawBtn");
+  const historyEl = document.getElementById("history");
+
+  function money(value){
+    return "KES " + Number(value || 0).toLocaleString();
+  }
+
+  function notify(message,error=false){
+    if(window.Apex?.showToast){
+      window.Apex.showToast(message,error);
+    }else{
+      alert(message);
+    }
+  }
+
+  /* ==========================
+     LOAD WALLET
+  ========================== */
+
+  async function loadWallet(){
+
+    try{
+
+      const data = await api("/wallet");
+
+      const wallet =
+        data.wallet ||
+        data.data ||
+        data;
+
+      const balance =
+        wallet.availableBalance ??
+        wallet.balance ??
+        wallet.available ??
+        0;
+
+      balanceEl.textContent = money(balance);
+
+    }catch(error){
+
+      console.error("Wallet error:",error);
+
+      balanceEl.textContent = "KES 0";
+
+    }
+
+  }
+
+  /* ==========================
+     LOAD WITHDRAWAL HISTORY
+  ========================== */
+
+  async function loadHistory(){
+
+    try{
+
+      const data = await api("/withdrawals");
+
+      const transactions =
+        data.withdrawals ||
+        data.transactions ||
+        data.data ||
+        [];
+
+      if(!Array.isArray(transactions) || transactions.length === 0){
+
+        historyEl.innerHTML =
+          '<div class="empty">No withdrawal history yet.</div>';
+
+        return;
+
+      }
+
+      historyEl.innerHTML = transactions.map(tx => {
+
+        const amount = tx.amount || 0;
+        const status = tx.status || "pending";
+
+        const date = tx.createdAt
+          ? new Date(tx.createdAt).toLocaleString()
+          : "Recent";
+
+        return `
+          <div class="transaction">
+
+            <div>
+              <div class="tx-title">
+                M-PESA Withdrawal
+              </div>
+
+              <div class="tx-date">
+                ${date}
+              </div>
+
+              <div class="status">
+                ${String(status).toUpperCase()}
+              </div>
+            </div>
+
+            <div class="tx-amount">
+              - ${money(amount)}
+            </div>
+
+          </div>
+        `;
+
+      }).join("");
+
+    }catch(error){
+
+      console.error("History error:",error);
+
+      historyEl.innerHTML =
+        '<div class="empty">Unable to load withdrawal history.</div>';
+
+    }
+
+  }
+
+  /* ==========================
+     SUBMIT WITHDRAWAL
+  ========================== */
+
+  button.addEventListener("click",async()=>{
+
+    const phone = phoneEl.value.trim();
+    const amount = Number(amountEl.value);
+
+    if(!phone){
+      notify("Enter your M-PESA phone number.",true);
+      return;
+    }
+
+    if(!/^(\+254|254|0)7\d{8}$/.test(phone)){
+      notify("Enter a valid Kenyan M-PESA number.",true);
+      return;
+    }
+
+    if(!amount || amount <= 0){
+      notify("Enter a valid withdrawal amount.",true);
+      return;
+    }
+
+    button.disabled = true;
+    button.textContent = "Processing...";
+
+    try{
+
+      /*
+        This endpoint must exist in your backend:
+
+        POST /api/v1/withdrawals
+      */
+
+      const result = await api("/withdrawals",{
+        method:"POST",
+        body:JSON.stringify({
+          method:"mpesa",
+          phone,
+          amount
+        })
+      });
+
+      notify(
+        result.message ||
+        "Withdrawal request submitted successfully."
+      );
+
+      amountEl.value = "";
+
+      await loadWallet();
+      await loadHistory();
+
+    }catch(error){
+
+      console.error(error);
+
+      notify(
+        error.message ||
+        "Withdrawal request failed.",
+        true
+      );
+
+    }finally{
+
+      button.disabled = false;
+      button.textContent = "Request Withdrawal";
+
+    }
+
+  });
+
+  await loadWallet();
+  await loadHistory();
+
+})();
+</script>
+
+  </section>
