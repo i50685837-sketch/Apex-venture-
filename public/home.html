@@ -1,0 +1,90 @@
+<style>
+  .page h1{ font-size:1.8rem; margin-bottom:6px; }
+  .page-sub{ color:var(--text-secondary); margin-bottom:26px; font-size:.95rem; }
+  .grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; margin-bottom:24px; }
+  .card{ background:var(--bg-card); border:1px solid var(--panel-border); border-radius:12px; padding:20px; }
+  .card-label{ font-size:.75rem; letter-spacing:.06em; text-transform:uppercase; color:var(--text-faint); margin-bottom:8px; }
+  .card-value{ font-family:'IBM Plex Mono', monospace; font-size:1.6rem; color:var(--brass-bright); }
+  .card-delta{ font-size:.82rem; margin-top:6px; }
+  .card-delta.up{ color:var(--positive); }
+  .card-delta.down{ color:var(--negative); }
+  .panel{ background:var(--bg-card); border:1px solid var(--panel-border); border-radius:12px; padding:24px; margin-bottom:20px; }
+  .panel h2{ font-size:1.15rem; margin-bottom:14px; }
+  ul.simple-list{ list-style:none; }
+  ul.simple-list li{ display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--panel-border); font-size:.9rem; color:var(--text-secondary); }
+  ul.simple-list li:last-child{ border-bottom:none; }
+  .skel{ background:linear-gradient(90deg, var(--bg-elevated) 25%, var(--panel-border) 50%, var(--bg-elevated) 75%); background-size:200% 100%; animation:shimmer 1.4s infinite; border-radius:6px; height:1.6rem; width:60%; }
+  @keyframes shimmer{ 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+  .empty{ color:var(--text-faint); font-size:.88rem; padding:16px 0; text-align:center; }
+</style>
+
+<section class="page">
+  <h1 id="homeGreeting">Welcome back</h1>
+  <p class="page-sub">Here's a quick look at where things stand today.</p>
+
+  <div class="grid">
+    <div class="card">
+      <div class="card-label">Portfolio Value</div>
+      <div class="card-value" id="portfolioValue"><span class="skel"></span></div>
+      <div class="card-delta" id="portfolioDelta"></div>
+    </div>
+    <div class="card">
+      <div class="card-label">Wallet Balance</div>
+      <div class="card-value" id="walletBalance"><span class="skel"></span></div>
+      <div class="card-delta up">Available to withdraw</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Active Loan</div>
+      <div class="card-value" id="loanBalance"><span class="skel"></span></div>
+      <div class="card-delta" id="loanDue"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Recent activity</h2>
+    <ul class="simple-list" id="activityList">
+      <li><span class="skel" style="width:100%"></span></li>
+    </ul>
+  </div>
+</section>
+
+<script>
+(async () => {
+  const { apiFetch, formatCurrency, showToast } = window.Apex;
+
+  try {
+    // GET /home/summary — expected shape:
+    // { name, portfolioValue, portfolioChangePct, walletBalance, activeLoan, loanDueInDays, activity: [{label, amount}] }
+    const data = await apiFetch("/home/summary");
+
+    document.getElementById("homeGreeting").textContent = `Welcome back, ${data.name || "Investor"}`;
+    document.getElementById("portfolioValue").textContent = formatCurrency(data.portfolioValue);
+    const delta = document.getElementById("portfolioDelta");
+    if (typeof data.portfolioChangePct === "number") {
+      delta.textContent = `${data.portfolioChangePct >= 0 ? "▲" : "▼"} ${Math.abs(data.portfolioChangePct)}% this month`;
+      delta.className = `card-delta ${data.portfolioChangePct >= 0 ? "up" : "down"}`;
+    }
+    document.getElementById("walletBalance").textContent = formatCurrency(data.walletBalance);
+    document.getElementById("loanBalance").textContent = formatCurrency(data.activeLoan);
+    document.getElementById("loanDue").textContent = data.loanDueInDays
+      ? `Due in ${data.loanDueInDays} days`
+      : "No active loan";
+    document.getElementById("loanDue").className = `card-delta ${data.activeLoan ? "down" : ""}`;
+
+    const list = document.getElementById("activityList");
+    if (data.activity && data.activity.length) {
+      list.innerHTML = data.activity.map(item => `
+        <li><span>${item.label}</span><span class="mono">${item.amount >= 0 ? "+" : ""}${formatCurrency(item.amount)}</span></li>
+      `).join("");
+    } else {
+      list.innerHTML = `<li class="empty">No recent activity yet.</li>`;
+    }
+  } catch (err) {
+    showToast(err.message || "Couldn't load your summary", true);
+    document.getElementById("homeGreeting").textContent = "Welcome back";
+    ["investment value","walletBalance","loanBalance"].forEach(id => document.getElementById(id).textContent = "—");
+    document.getElementById("activityList").innerHTML = `<li class="empty">Couldn't load activity.</li>`;
+  }
+})();
+</script>
+
