@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Invest | Apex Venture Investment</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+body{
+    background:#06100b;
+    color:#fff;
+    min-height:100vh;
+}
+
+.header{
+    height:70px;
+    padding:0 20px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:#091810;
+    border-bottom:1px solid #193122;
+    position:sticky;
+    top:0;
+    z-index:20;
+}
+
+.header-left{
+    display:flex;
+    align-items:center;
+    gap:14px;
+}
+
+.back{
+    color:#fff;
+    text-decoration:none;
+    font-size:28px;
+}
+
+.logo{
+    font-size:17px;
+    font-weight:700;
+}
+
+.container{
+    width:100%;
+    max-width:1150px;
+    margin:auto;
+    padding:24px 16px 50px;
+}
+
+.section{
+    margin-top:25px;
+}
+
+.section:first-child{
+    margin-top:0;
+}
+
+.section-title{
+    font-size:20px;
+    margin-bottom:5px;
+}
+
+.section-subtitle{
+    color:#718278;
+    font-size:12px;
+    margin-bottom:16px;
+}
+
+/* PLANS */
+
+.section-heading{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:15px;
+}
+
+.plan-count{
+    padding:7px 11px;
+    border-radius:20px;
+    background:#102b1b;
+    color:#42df7d;
+    font-size:11px;
+}
+
+.plans-grid{
+    display:grid;
+    grid-template-columns:
+        repeat(auto-fit,minmax(190px,1fr));
+    gap:13px;
+}
+
+.plan-card{
+    background:#0a1911;
+    border:1px solid #193122;
+    border-radius:17px;
+    padding:18px;
+    cursor:pointer;
+    transition:.2s ease;
+}
+
+.plan-card:hover{
+    transform:translateY(-3px);
+    border-color:#2c7148;
+}
+
+.plan-card.active{
+    border-color:#39df7c;
+    background:#0c2115;
+    box-shadow:
+        0 0 0 1px rgba(57,223,124,.08),
+        0 12px 30px rgba(0,0,0,.2);
+}
+
+.plan-icon{
+    width:42px;
+    height:42px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#102b1b;
+    border-radius:12px;
+    font-size:20px;
+    margin-bottom:13px;
+}
+
+.plan-card h3{
+    font-size:16px;
+}
+
+.plan-rate{
+    color:#42df7d;
+    font-size:23px;
+    font-weight:800;
+    margin-top:9px;
+}
+
+.plan-growth{
+    color:#718278;
+    font-size:11px;
+    margin-top:2px;
+}
+
+.plan-details{
+    display:flex;
+    justify-content:space-between;
+    margin-top:13px;
+    padding-top:10px;
+    border-top:1px solid #172a20;
+    font-size:11px;
+}
+
+.plan-details span{
+    color:#718278;
+}
+
+.plan-details strong{
+    color:#dce7df;
+}
+
+/* BALANCE */
+
+.balance-grid{
+    display:grid;
+    grid-template-columns:
+        repeat(3,1fr);
+    gap:15px;
+}
+
+.card{
+    background:#0a1911;
+    border:1px solid #193122;
+    border-radius:18px;
+    padding:20px;
+}
+
+.card small{
+    color:#83978a;
+    font-size:12px;
+}
+
+.card h2{
+    margin-top:9px;
+    font-size:25px;
+}
+
+.green{
+    color:#39df7c;
+}
+
+/* MAIN INVEST AREA */
+
+.invest-layout{
+    display:grid;
+    grid-template-columns:1fr 330px;
+    gap:18px;
+}
+
+/* CHART */
+
+.chart-card{
+    background:#0a1911;
+    border:1px solid #193122;
+    border-radius:18px;
+    padding:20px;
+}
+
+.chart-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.chart-head small{
+    color:#718278;
+}
+
+.chart-growth{
+    color:#39df7c;
+    font-size:15px;
+    font-weight:bold;
+}
+
+.chart{
+    position:relative;
+    height:320px;
+    margin-top:20px;
+    padding-left:50px;
+    padding-bottom:35px;
+}
+
+.y-axis{
+    position:absolute;
+    left:0;
+    top:0;
+    bottom:35px;
+    width:43px;
+
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+
+    color:#687b70;
+    font-size:10px;
+    text-align:right;
+}
+
+.graph-area{
+    position:relative;
+    width:100%;
+    height:100%;
+
+    border-left:1px solid #496053;
+    border-bottom:1px solid #496053;
+
+    background:
+        linear-gradient(
+            to bottom,
+            transparent 24.7%,
+            #15291e 25%,
+            transparent 25.3%,
+            transparent 49.7%,
+            #15291e 50%,
+            transparent 50.3%,
+            transparent 74.7%,
+            #15291e 75%,
+            transparent 75.3%
+        );
+}
+
+.graph-svg{
+    width:100%;
+    height:100%;
+}
+
+.graph-line{
+    fill:none;
+    stroke:#39df7c;
+    stroke-width:3;
+    vector-effect:non-scaling-stroke;
+}
+
+.graph-point{
+    fill:#39df7c;
+    stroke:#06100b;
+    stroke-width:2;
+}
+
+.x-axis{
+    position:absolute;
+    left:50px;
+    right:0;
+    bottom:5px;
+
+    display:flex;
+    justify-content:space-between;
+
+    color:#687b70;
+    font-size:10px;
+}
+
+/* FORM */
+
+.form-card{
+    background:#0a1911;
+    border:1px solid #193122;
+    border-radius:18px;
+    padding:20px;
+}
+
+.selected-plan{
+    padding:13px;
+    border-radius:12px;
+    background:#06100b;
+    border:1px solid #193122;
+    margin-bottom:15px;
+}
+
+.selected-label{
+    color:#718278;
+    font-size:11px;
+}
+
+.selected-info{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-top:5px;
+}
+
+.selected-info strong{
+    font-size:15px;
+}
+
+label{
+    display:block;
+    margin:17px 0 7px;
+    color:#91a197;
+    font-size:13px;
+}
+
+input{
+    width:100%;
+    padding:14px;
+    border-radius:11px;
+    outline:none;
+    border:1px solid #294333;
+    background:#06100b;
+    color:#fff;
+    font-size:14px;
+}
+
+input:focus{
+    border-color:#36d876;
+}
+
+.summary{
+    margin-top:18px;
+    background:#06100b;
+    border-radius:13px;
+    padding:15px;
+}
+
+.summary-row{
+    display:flex;
+    justify-content:space-between;
+    margin:9px 0;
+    color:#92a198;
+    font-size:13px;
+}
+
+.summary-row strong{
+    color:#fff;
+}
+
+.summary-row.total{
+    border-top:1px solid #1b3023;
+    padding-top:13px;
+    margin-top:13px;
+}
+
+.summary-row.total strong{
+    color:#42e27f;
+    font-size:18px;
+}
+
+/* REACTIVE BUTTON */
+
+#investBtn{
+    width:100%;
+    border:0;
+    border-radius:12px;
+    padding:15px;
+    margin-top:18px;
+
+    color:#fff;
+    font-size:15px;
+    font-weight:700;
+
+    cursor:pointer;
+
+    transition:
+        transform .15s ease,
+        background .2s ease,
+        opacity .2s ease;
+}
+
+#investBtn:active{
+    transform:scale(.97);
+}
+
+#investBtn.ready{
+    background:#29ce6b;
+    box-shadow:
+        0 8px 25px rgba(41,206,107,.15);
+}
+
+#investBtn.loading{
+    background:#176d3b;
+}
+
+#investBtn.success{
+    background:#167a43;
+}
+
+#investBtn.error{
+    background:#704040;
+}
+
+#investBtn:disabled{
+    cursor:not-allowed;
+}
+
+.button-content{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:9px;
+}
+
+.spinner{
+    width:16px;
+    height:16px;
+    border:2px solid rgba(255,255,255,.3);
+    border-top-color:#fff;
+    border-radius:50%;
+    animation:spin .7s linear infinite;
+}
+
+@keyframes spin{
+    to{
+        transform:rotate(360deg);
+    }
+}
+
+.message{
+    min-height:18px;
+    margin-top:12px;
+    text-align:center;
+    color:#8fa197;
+    font-size:12px;
+}
+
+/* TRANSACTIONS */
+
+.transaction{
+    background:#0a1911;
+    border:1px solid #193122;
+    border-radius:18px;
+    overflow:hidden;
+}
+
+.transaction-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:16px 18px;
+    border-bottom:1px solid #172a20;
+}
+
+.transaction-row:last-child{
+    border-bottom:0;
+}
+
+.transaction-left{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.transaction-icon{
+    width:38px;
+    height:38px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#123a23;
+}
+
+.transaction-name{
+    font-size:14px;
+    font-weight:600;
+}
+
+.transaction-date{
+    color:#718278;
+    font-size:11px;
+    margin-top:4px;
+}
+
+.amount{
+    font-weight:700;
+}
+
+.credit{
+    color:#40df7b;
+}
+
+.debit{
+    color:#ff7777;
+}
+
+.empty{
+    padding:35px;
+    text-align:center;
+    color:#718278;
+}
+
+/* MOBILE */
+
+@media(max-width:850px){
+
+    .balance-grid{
+        grid-template-columns:1fr;
+    }
+
+    .invest-layout{
+        grid-template-columns:1fr;
+    }
+
+}
+
+@media(max-width:600px){
+
+    .container{
+        padding:18px 12px 40px;
+    }
+
+    .header{
+        padding:0 14px;
+    }
+
+    .logo{
+        font-size:14px;
+    }
+
+    .plans-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .plan-card{
+        padding:14px;
+    }
+
+    .plan-rate{
+        font-size:20px;
+    }
+
+}
+
+@media(max-width:400px){
+
+    .plans-grid{
+        grid-template-columns:1fr;
+    }
+
+    .section-heading{
+        align-items:flex-start;
+    }
+
+}
+</style>
+</head>
+
+
+<body>
+
+<!-- HEADER -->
+
+<header class="header">
+
+    <div class="header-left">
+
+        <a href="dashboard.html" class="back">
+            ‹
+        </a>
+
+        <div class="logo">
+            Apex Venture Investment
+        </div>
+
+    </div>
+
+    <div>📈</div>
+
+</header>
+
+
+<main class="container">
+
+
+<!-- =====================================
+     INVESTMENT PLANS — TOP
+====================================== -->
+
+<section class="section">
+
+    <div class="section-heading">
+
+        <div>
+
+            <h2 class="section-title">
+                Investment Plans
+            </h2>
+
+            <p class="section-subtitle">
+                Select an investment plan
+            </p>
+
+        </div>
+
+        <span class="plan-count">
+            7 Plans
+        </span>
+
+    </div>
+
+
+    <div class="plans-grid">
+
+
+        <!-- STARTER -->
+
+        <div class="plan-card active"
+             data-plan="Starter"
+             data-min="750"
+             data-rate="15"
+             data-duration="3 Hours">
+
+            <div class="plan-icon">
+                🌱
+            </div>
+
+            <h3>Starter</h3>
+
+            <div class="plan-rate">
+                15%
+            </div>
+
+            <div class="plan-growth">
+                Growth
+            </div>
+
+            <div class="plan-details">
+                <span>Minimum</span>
+                <strong>KES 750</strong>
+            </div>
+
+            <div class="plan-details">
+                <span>Duration</span>
+                <strong>3 Hours</strong>
+            </div>
+
+        </div>
+
+
+        <!-- GROWTH -->
+
+        <div class="plan-card"
+             data-plan="Growth"
+             data-min="1000"
+             data-rate="25"
+             data-duration="6 Hours">
+
+            <div class="plan-icon">
+                📈
+            </div>
+
+            <h3>Growth</h3>
+
+            <div class="plan-rate">
+                25%
+            </div>
+
+            <div class="plan-growth">
+                Growth
+            </div>
+
+            <div class="plan-details">
+                <span>Minimum</span>
+                <strong>KES 1,000</strong>
+            </div>
+
+            <div class="plan-details">
+                <span>Duration</span>
+                <strong>6 Hours</strong>
+            </div>
+
+        </div>
+
+
+        <!-- SILVER -->
+
+        <div class="plan-card"
+             data-plan="Silver"
+             data-min="2500"
+             data-rate="30"
+             data-duration="12 Hours">
+
+            <div class="plan-icon">
+                🥈
+            </div>
+
+            <h3>Silver</h3>
+
+            <div class="plan-rate">
+                30%
+            </div>
+
+            <div class="plan-growth">
+                Growth
+            </div>
+
+            <div class="plan-details">
+                <span>Minimum</span>
+                <strong>KES 2,500</strong>
+            </div>
+
+            <div class="plan-details">
+                <span>Duration</span>
+                <strong>12 Hours</strong>
+            </div>
+
+        </div>
+
+
+        <!-- PREMIUM -->
+
+        <div class="plan-card"
+             data-plan="Premium"
+             data-min="5000"
+             data-rate="35"
+             data-duration="24 Hours">
+
+            <div class="plan-icon">
+                💎
+            </div>
+
+            <h3>Premium</h3>
+
+            <div class="plan-rate">
+                35%
+            </div>
+
+            <div class="plan-growth">
+                Growth
+            </div>
+
+            <div class="plan-details">
+                <span>Minimum</span>
+                <strong>KES 5,000</strong>
+            </div>
+
+            <div class="plan-details">
+                <span>Duration</span>
+                <strong>24 Hours</strong>
+            </div>
+
+        </div>
+
+
+        <!-- GOLD -->
+
+        <div class="plan-card"
+             data-plan="Gold"
+             data-min="10000"
+             data-rate="40"
+             data-duration="2 Days">
+
+            <div class="plan-icon">
+                🥇
+            </div>
+
+            <h3>Gold</h3>
+
+            <div class="plan-rate">
+                40%
+            </div>
+
+            <div class="plan-growth">
+                Growth
+            </div>
+
+            <div class="plan-details">
+                <span>Minimum</span>
+                <strong>KES 10,000</strong>
+            </div>
+
+            <div class="plan-details">
+                <span>Duration</span>
+                <strong>2 Days</strong>
+            </div>
+
+        </div>
+
+
+        <!-- PLATINUM -->
+
+        <div class="plan-card"
+             data-plan="Platinum"
+             data-min="25000"
+             data-rate="50"
+             data-duration="3 Days">
+
+            <div class="plan-icon">
+                👑
+            </div>
+
+            <h3>Platinum</h3>
+
+            <div class="plan-rate">
+                50%
+            </div>
+
+            <div class="plan-growth">
+                Growth
+            </div>
+
+            <div class="plan-details">
+                <span>Minimum</span>
+                <strong>KES 25,000</strong>
+            </div>
+
+            <div class="plan-details">
+                <span>Duration</span>
+                <strong>3 Days</strong>
+            </div>
+
+        </div>
+
+
+        <!-- ELITE -->
+
+        <div class="plan-card"
+             data-plan="Elite"
+             data-min="50000"
+             data-rate="60"
+             data-duration="7 Days">
+
+            <div class="plan-icon">
+                🚀
+            </div>
+
+            <h3>Elite</h3>
+
+            <div class="plan-rate">
+                60%
+            </div>
+
+            <div class="plan-growth">
+                Growth
+            </div>
+
+            <div class="plan-details">
+                <span>Minimum</span>
+                <strong>KES 50,000</strong>
+            </div>
+
+            <div class="plan-details">
+                <span>Duration</span>
+                <strong>7 Days</strong>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================
+     BALANCE
+====================================== -->
+
+<section class="section">
+
+    <div class="balance-grid">
+
+        <div class="card">
+
+            <small>
+                Available Balance
+            </small>
+
+            <h2 id="balance">
+                KES 0.00
+            </h2>
+
+        </div>
+
+
+        <div class="card">
+
+            <small>
+                Total Invested
+            </small>
+
+            <h2 id="invested">
+                KES 0.00
+            </h2>
+
+        </div>
+
+
+        <div class="card">
+
+            <small>
+                Total Returns
+            </small>
+
+            <h2
+                id="returns"
+                class="green">
+                KES 0.00
+            </h2>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================
+     INVESTMENT + CHART
+====================================== -->
+
+<section class="section">
+
+    <div class="invest-layout">
+
+
+        <!-- GROWTH GRAPH -->
+
+        <div class="chart-card">
+
+            <div class="chart-head">
+
+                <div>
+
+                    <h2 class="section-title">
+                        Investment Growth
+                    </h2>
+
+                    <small>
+                        Projected growth visualization
+                    </small>
+
+                </div>
+
+                <div
+                    id="growthPercent"
+                    class="chart-growth">
+                    +15%
+                </div>
+
+            </div>
+
+
+            <div class="chart">
+
+
+                <!-- Y AXIS -->
+
+                <div class="y-axis">
+
+                    <span id="y4">
+                        0
+                    </span>
+
+                    <span id="y3">
+                        0
+                    </span>
+
+                    <span id="y2">
+                        0
+                    </span>
+
+                    <span id="y1">
+                        0
+                    </span>
+
+                    <span>
+                        0
+                    </span>
+
+                </div>
+
+
+                <!-- GRAPH -->
+
+                <div class="graph-area">
+
+                    <svg
+                        class="graph-svg"
+                        viewBox="0 0 500 250"
+                        preserveAspectRatio="none">
+
+                        <path
+                            class="graph-line"
+                            d="M0 230
+                               L100 190
+                               L200 155
+                               L300 120
+                               L400 70
+                               L500 30">
+                        </path>
+
+                        <circle
+                            class="graph-point"
+                            cx="0"
+                            cy="230"
+                            r="5">
+                        </circle>
+
+                        <circle
+                            class="graph-point"
+                            cx="100"
+                            cy="190"
+                            r="5">
+                        </circle>
+
+                        <circle
+                            class="graph-point"
+                            cx="200"
+                            cy="155"
+                            r="5">
+                        </circle>
+
+                        <circle
+                            class="graph-point"
+                            cx="300"
+                            cy="120"
+                            r="5">
+                        </circle>
+
+                        <circle
+                            class="graph-point"
+                            cx="400"
+                            cy="70"
+                            r="5">
+                        </circle>
+
+                        <circle
+                            class="graph-point"
+                            cx="500"
+                            cy="30"
+                            r="5">
+                        </circle>
+
+                    </svg>
+
+                </div>
+
+
+                <!-- X AXIS -->
+
+                <div class="x-axis">
+
+                    <span>Start</span>
+                    <span>25%</span>
+                    <span>50%</span>
+                    <span>75%</span>
+                    <span>100%</span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- START INVESTMENT -->
+
+        <div class="form-card">
+
+            <h2 class="section-title">
+                Start Investment
+            </h2>
+
+
+            <div class="selected-plan">
+
+                <div class="selected-label">
+                    Selected Plan
+                </div>
+
+                <div class="selected-info">
+
+                    <strong id="selectedPlanName">
+                        Starter
+                    </strong>
+
+                    <strong
+                        id="selectedPlanRate"
+                        class="green">
+                        +15%
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <label>
+                Investment Amount
+            </label>
+
+            <input
+                type="number"
+                id="amount"
+                placeholder="Enter amount"
+                min="0"
+                autocomplete="off">
+
+
+            <div class="summary">
+
+
+                <div class="summary-row">
+
+             
