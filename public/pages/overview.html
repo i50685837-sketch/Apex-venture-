@@ -1,0 +1,773 @@
+<section class="overview-page">
+
+<style>
+.overview-page{
+  width:100%;
+}
+
+.overview-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:15px;
+  margin-bottom:25px;
+}
+
+.overview-header h1{
+  font-size:2rem;
+  margin-bottom:5px;
+}
+
+.overview-header p{
+  color:var(--text-secondary);
+  font-size:.9rem;
+}
+
+.refresh-btn{
+  border:1px solid var(--panel-border);
+  background:var(--bg-card);
+  color:var(--brass-bright);
+  padding:10px 15px;
+  border-radius:9px;
+  cursor:pointer;
+}
+
+.refresh-btn:hover{
+  background:rgba(198,164,92,.08);
+}
+
+/* BALANCE */
+.balance-card{
+  background:
+    linear-gradient(135deg,
+      rgba(198,164,92,.16),
+      rgba(11,27,52,.2)
+    ),
+    var(--bg-card);
+
+  border:1px solid var(--panel-border);
+  border-radius:18px;
+  padding:25px;
+  margin-bottom:22px;
+  position:relative;
+  overflow:hidden;
+}
+
+.balance-card:after{
+  content:"";
+  position:absolute;
+  width:170px;
+  height:170px;
+  right:-70px;
+  top:-70px;
+  border-radius:50%;
+  border:1px solid rgba(198,164,92,.15);
+}
+
+.balance-label{
+  color:var(--text-secondary);
+  font-size:.85rem;
+  margin-bottom:8px;
+}
+
+.balance{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:2.25rem;
+  font-weight:600;
+  color:var(--text-primary);
+}
+
+.balance-status{
+  margin-top:12px;
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  font-size:.78rem;
+  color:var(--positive);
+}
+
+.status-dot{
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:var(--positive);
+}
+
+/* STAT GRID */
+.stats{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:15px;
+  margin-bottom:25px;
+}
+
+.stat-card{
+  background:var(--bg-card);
+  border:1px solid var(--panel-border);
+  border-radius:14px;
+  padding:18px;
+}
+
+.stat-title{
+  color:var(--text-secondary);
+  font-size:.78rem;
+  margin-bottom:10px;
+}
+
+.stat-value{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:1.15rem;
+  font-weight:600;
+}
+
+.green{
+  color:var(--positive);
+}
+
+.red{
+  color:var(--negative);
+}
+
+.gold{
+  color:var(--brass-bright);
+}
+
+/* SECTION */
+.section{
+  background:var(--bg-card);
+  border:1px solid var(--panel-border);
+  border-radius:15px;
+  margin-bottom:22px;
+  overflow:hidden;
+}
+
+.section-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:18px 20px;
+  border-bottom:1px solid var(--panel-border);
+}
+
+.section-head h2{
+  font-size:1.05rem;
+}
+
+.section-head span{
+  color:var(--text-faint);
+  font-size:.75rem;
+}
+
+/* TABLE */
+.table-wrap{
+  width:100%;
+  overflow-x:auto;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:650px;
+}
+
+th{
+  text-align:left;
+  padding:13px 20px;
+  font-size:.72rem;
+  color:var(--text-faint);
+  font-weight:500;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+}
+
+td{
+  padding:15px 20px;
+  border-top:1px solid var(--panel-border);
+  font-size:.84rem;
+}
+
+.type{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+}
+
+.type-icon{
+  width:30px;
+  height:30px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:8px;
+  background:rgba(198,164,92,.08);
+  color:var(--brass-bright);
+}
+
+.badge{
+  display:inline-block;
+  padding:5px 9px;
+  border-radius:20px;
+  font-size:.7rem;
+}
+
+.badge.success{
+  color:var(--positive);
+  background:rgba(95,185,138,.1);
+}
+
+.badge.pending{
+  color:var(--brass-bright);
+  background:rgba(198,164,92,.1);
+}
+
+.badge.failed{
+  color:var(--negative);
+  background:rgba(217,122,108,.1);
+}
+
+/* EMPTY */
+.empty{
+  padding:35px 20px;
+  text-align:center;
+  color:var(--text-faint);
+  font-size:.85rem;
+}
+
+/* MOBILE */
+@media(max-width:850px){
+  .stats{
+    grid-template-columns:repeat(2,1fr);
+  }
+}
+
+@media(max-width:550px){
+
+  .overview-header{
+    align-items:flex-start;
+  }
+
+  .overview-header h1{
+    font-size:1.55rem;
+  }
+
+  .refresh-btn{
+    padding:8px 10px;
+  }
+
+  .balance{
+    font-size:1.8rem;
+  }
+
+  .stats{
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+
+  .stat-card{
+    padding:14px;
+  }
+
+  .stat-value{
+    font-size:.95rem;
+  }
+}
+</style>
+
+
+<!-- HEADER -->
+
+<div class="overview-header">
+
+  <div>
+    <h1>Dashboard</h1>
+    <p>Your Apex Ventures financial overview</p>
+  </div>
+
+  <button class="refresh-btn" id="refreshBtn">
+    ↻ Refresh
+  </button>
+
+</div>
+
+
+<!-- WALLET BALANCE -->
+
+<div class="balance-card">
+
+  <div class="balance-label">
+    Available M-Pesa Balance
+  </div>
+
+  <div class="balance" id="walletBalance">
+    KES 0.00
+  </div>
+
+  <div class="balance-status">
+    <span class="status-dot"></span>
+    Wallet active
+  </div>
+
+</div>
+
+
+<!-- STATS -->
+
+<div class="stats">
+
+  <div class="stat-card">
+    <div class="stat-title">
+      TOTAL INVESTED
+    </div>
+
+    <div class="stat-value gold" id="totalInvested">
+      KES 0.00
+    </div>
+  </div>
+
+
+  <div class="stat-card">
+    <div class="stat-title">
+      TOTAL PROFIT
+    </div>
+
+    <div class="stat-value green" id="totalProfit">
+      KES 0.00
+    </div>
+  </div>
+
+
+  <div class="stat-card">
+    <div class="stat-title">
+      TOTAL WITHDRAWN
+    </div>
+
+    <div class="stat-value" id="totalWithdrawn">
+      KES 0.00
+    </div>
+  </div>
+
+
+  <div class="stat-card">
+    <div class="stat-title">
+      TOTAL LOSSES
+    </div>
+
+    <div class="stat-value red" id="totalLoss">
+      KES 0.00
+    </div>
+  </div>
+
+</div>
+
+
+<!-- INVESTMENT HISTORY -->
+
+<div class="section">
+
+  <div class="section-head">
+
+    <h2>Investment History</h2>
+
+    <span id="investmentCount">
+      0 investments
+    </span>
+
+  </div>
+
+  <div class="table-wrap">
+
+    <table>
+
+      <thead>
+        <tr>
+          <th>Investment</th>
+          <th>Amount</th>
+          <th>Profit</th>
+          <th>Status</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+
+      <tbody id="investmentHistory">
+
+        <tr>
+          <td colspan="5">
+            <div class="empty">
+              No investment history yet.
+            </div>
+          </td>
+        </tr>
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+</div>
+
+
+<!-- TRANSACTIONS -->
+
+<div class="section">
+
+  <div class="section-head">
+
+    <h2>Transaction History</h2>
+
+    <span id="transactionCount">
+      0 transactions
+    </span>
+
+  </div>
+
+  <div class="table-wrap">
+
+    <table>
+
+      <thead>
+
+        <tr>
+          <th>Transaction</th>
+          <th>Amount</th>
+          <th>Status</th>
+          <th>Date</th>
+        </tr>
+
+      </thead>
+
+      <tbody id="transactionHistory">
+
+        <tr>
+          <td colspan="4">
+            <div class="empty">
+              No transactions yet.
+            </div>
+          </td>
+        </tr>
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+</div>
+
+
+<script>
+
+(async function(){
+
+  const Apex = window.Apex;
+
+  if(!Apex || !Apex.apiFetch){
+
+    console.error("Apex API helper not found.");
+    return;
+
+  }
+
+
+  function money(value){
+
+    return "KES " +
+      Number(value || 0).toLocaleString(
+        "en-KE",
+        {
+          minimumFractionDigits:2,
+          maximumFractionDigits:2
+        }
+      );
+
+  }
+
+
+  function date(value){
+
+    if(!value) return "—";
+
+    try{
+
+      return new Date(value).toLocaleDateString(
+        "en-KE",
+        {
+          day:"2-digit",
+          month:"short",
+          year:"numeric"
+        }
+      );
+
+    }catch{
+
+      return "—";
+
+    }
+
+  }
+
+
+  function statusBadge(status){
+
+    const value =
+      String(status || "pending").toLowerCase();
+
+    let cls = "pending";
+
+    if(
+      value === "success" ||
+      value === "completed" ||
+      value === "active"
+    ){
+
+      cls = "success";
+
+    }
+
+    if(
+      value === "failed" ||
+      value === "cancelled" ||
+      value === "rejected"
+    ){
+
+      cls = "failed";
+
+    }
+
+    return `
+      <span class="badge ${cls}">
+        ${value}
+      </span>
+    `;
+
+  }
+
+
+  async function loadDashboard(){
+
+    try{
+
+      const data =
+        await Apex.apiFetch("/dashboard");
+
+
+      /*
+       Expected backend response:
+
+       {
+         walletBalance: 1500,
+         totalInvested: 5000,
+         totalProfit: 850,
+         totalWithdrawn: 2000,
+         totalLoss: 100,
+
+         investments: [],
+         transactions: []
+       }
+      */
+
+
+      document.getElementById("walletBalance")
+        .textContent = money(data.walletBalance);
+
+      document.getElementById("totalInvested")
+        .textContent = money(data.totalInvested);
+
+      document.getElementById("totalProfit")
+        .textContent = money(data.totalProfit);
+
+      document.getElementById("totalWithdrawn")
+        .textContent = money(data.totalWithdrawn);
+
+      document.getElementById("totalLoss")
+        .textContent = money(data.totalLoss);
+
+
+      /* INVESTMENTS */
+
+      const investments =
+        Array.isArray(data.investments)
+        ? data.investments
+        : [];
+
+
+      document.getElementById("investmentCount")
+        .textContent =
+        `${investments.length} investment${investments.length === 1 ? "" : "s"}`;
+
+
+      const investmentTable =
+        document.getElementById("investmentHistory");
+
+
+      if(!investments.length){
+
+        investmentTable.innerHTML = `
+          <tr>
+            <td colspan="5">
+              <div class="empty">
+                No investment history yet.
+              </div>
+            </td>
+          </tr>
+        `;
+
+      }else{
+
+        investmentTable.innerHTML =
+          investments.map(item => `
+
+            <tr>
+
+              <td>
+
+                <div class="type">
+
+                  <span class="type-icon">
+                    ◈
+                  </span>
+
+                  ${item.plan || "Investment"}
+
+                </div>
+
+              </td>
+
+              <td>
+                ${money(item.amount)}
+              </td>
+
+              <td class="green">
+                +${money(item.profit)}
+              </td>
+
+              <td>
+                ${statusBadge(item.status)}
+              </td>
+
+              <td>
+                ${date(item.createdAt || item.date)}
+              </td>
+
+            </tr>
+
+          `).join("");
+
+      }
+
+
+      /* TRANSACTIONS */
+
+      const transactions =
+        Array.isArray(data.transactions)
+        ? data.transactions
+        : [];
+
+
+      document.getElementById("transactionCount")
+        .textContent =
+        `${transactions.length} transaction${transactions.length === 1 ? "" : "s"}`;
+
+
+      const transactionTable =
+        document.getElementById("transactionHistory");
+
+
+      if(!transactions.length){
+
+        transactionTable.innerHTML = `
+          <tr>
+            <td colspan="4">
+              <div class="empty">
+                No transactions yet.
+              </div>
+            </td>
+          </tr>
+        `;
+
+      }else{
+
+        transactionTable.innerHTML =
+          transactions.map(tx => `
+
+            <tr>
+
+              <td>
+
+                <div class="type">
+
+                  <span class="type-icon">
+
+                    ${
+                      String(tx.type || "").toLowerCase()
+                      .includes("deposit")
+                      ? "↓"
+                      : "↑"
+                    }
+
+                  </span>
+
+                  ${tx.type || "Transaction"}
+
+                </div>
+
+              </td>
+
+              <td>
+
+                ${
+                  String(tx.type || "")
+                  .toLowerCase()
+                  .includes("withdraw")
+                  ? "-"
+                  : "+"
+                }
+
+                ${money(tx.amount)}
+
+              </td>
+
+              <td>
+                ${statusBadge(tx.status)}
+              </td>
+
+              <td>
+                ${date(tx.createdAt || tx.date)}
+              </td>
+
+            </tr>
+
+          `).join("");
+
+      }
+
+
+    }catch(error){
+
+      console.error("Dashboard error:",error);
+
+      Apex.showToast(
+        error.message || "Unable to load dashboard",
+        true
+      );
+
+    }
+
+  }
+
+
+  document
+    .getElementById("refreshBtn")
+    .addEventListener(
+      "click",
+      loadDashboard
+    );
+
+
+  loadDashboard();
+
+})();
+
+</script>
+
+  </section>
