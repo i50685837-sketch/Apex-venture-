@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+7<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -271,8 +271,7 @@
         <label for="phone">Phone Number (Twilio SMS)</label>
         <div class="input-wrapper">
           <input type="tel" id="phone" placeholder="+254 7XX XXX XXX" required />
-          <button type="button" id="sendOtpBtn" class="btn-verify">Send OTP</button>
-        </div>
+      </div>
       </div>
 
       <!-- Dedicated OTP Bar -->
@@ -343,32 +342,6 @@
         alertBox.className = `alert ${isSuccess ? 'alert-success' : 'alert-error'}`;
         alertBox.style.display = 'block';
       }
-
-      // Handle Twilio SMS OTP Trigger
-      sendOtpBtn.addEventListener('click', async () => {
-        const phone = document.getElementById('phone').value;
-        if (!phone) {
-          return showAlert('Please enter your phone number first.');
-        }
-
-        try {
-          const res = await fetch('/api/auth/send-otp', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ phone })
-          });
-          const data = await res.json();
-
-          if (data.success) {
-            showAlert('OTP sent via Twilio SMS!', true);
-            sendOtpBtn.textContent = 'Resend';
-            document.getElementById('otp').focus();
-          } else {
-            showAlert(data.message || 'Failed to send OTP.');
-          }
-        } catch (err) {
-          showAlert('Error sending OTP. Please try again.');
-        }
       });
 
       // Handle Registration
