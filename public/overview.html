@@ -1,0 +1,69 @@
+<style>
+  .page h1{ font-size:1.8rem; margin-bottom:6px; }
+  .page-sub{ color:var(--text-secondary); margin-bottom:26px; font-size:.95rem; }
+  .grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; margin-bottom:24px; }
+  .card{ background:var(--bg-card); border:1px solid var(--panel-border); border-radius:12px; padding:20px; }
+  .card-label{ font-size:.75rem; letter-spacing:.06em; text-transform:uppercase; color:var(--text-faint); margin-bottom:8px; }
+  .card-value{ font-family:'IBM Plex Mono', monospace; font-size:1.6rem; color:var(--brass-bright); }
+  .panel{ background:var(--bg-card); border:1px solid var(--panel-border); border-radius:12px; padding:24px; margin-bottom:20px; }
+  .panel h2{ font-size:1.15rem; margin-bottom:14px; }
+  ul.simple-list{ list-style:none; }
+  ul.simple-list li{ display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--panel-border); font-size:.9rem; color:var(--text-secondary); }
+  ul.simple-list li:last-child{ border-bottom:none; }
+  .status-tag{ font-family:'IBM Plex Mono', monospace; font-size:.78rem; padding:3px 9px; border-radius:20px; }
+  .status-tag.active{ color:var(--positive); background:rgba(95,185,138,0.12); }
+  .status-tag.completed{ color:var(--text-faint); background:rgba(159,176,201,0.1); }
+  .empty{ color:var(--text-faint); font-size:.88rem; padding:16px 0; text-align:center; }
+  .skel{ background:linear-gradient(90deg, var(--bg-elevated) 25%, var(--panel-border) 50%, var(--bg-elevated) 75%); background-size:200% 100%; animation:shimmer 1.4s infinite; border-radius:6px; height:1.6rem; width:60%; display:inline-block; }
+  @keyframes shimmer{ 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+</style>
+
+<section class="page">
+  <h1>Dashboard</h1>
+  <p class="page-sub">Your account performance at a glance.</p>
+
+  <div class="grid">
+    <div class="card"><div class="card-label">Total Deposits</div><div class="card-value" id="totalDeposits"><span class="skel"></span></div></div>
+    <div class="card"><div class="card-label">Total Returns</div><div class="card-value" id="totalReturns"><span class="skel"></span></div></div>
+    <div class="card"><div class="card-label">Referral Bonus</div><div class="card-value" id="referralBonus"><span class="skel"></span></div></div>
+  </div>
+
+  <div class="panel">
+    <h2>Investment plans</h2>
+    <ul class="simple-list" id="plansList">
+      <li><span class="skel" style="width:100%"></span></li>
+    </ul>
+  </div>
+</section>
+
+<script>
+(async () => {
+  const { apiFetch, formatCurrency, showToast } = window.Apex;
+  try {
+    // GET /dashboard/overview — expected shape:
+    // { totalDeposits, totalReturns, referralBonus, plans: [{name, durationLabel, status}] }
+    const data = await apiFetch("/dashboard/overview");
+
+    document.getElementById("totalDeposits").textContent = formatCurrency(data.totalDeposits);
+    document.getElementById("totalReturns").textContent = formatCurrency(data.totalReturns);
+    document.getElementById("referralBonus").textContent = formatCurrency(data.referralBonus);
+
+    const list = document.getElementById("plansList");
+    if (data.plans && data.plans.length) {
+      list.innerHTML = data.plans.map(p => `
+        <li>
+          <span>${p.name} — ${p.durationLabel}</span>
+          <span class="status-tag ${p.status === "Active" ? "active" : "completed"}">${p.status}</span>
+        </li>
+      `).join("");
+    } else {
+      list.innerHTML = `<li class="empty">No investment plans yet. Head to Invest to get started.</li>`;
+    }
+  } catch (err) {
+    showToast(err.message || "Couldn't load your dashboard", true);
+    ["totalDeposits","totalReturns","referralBonus"].forEach(id => document.getElementById(id).textContent = "—");
+    document.getElementById("plansList").innerHTML = `<li class="empty">Couldn't load plans.</li>`;
+  }
+})();
+</script>
+
