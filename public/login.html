@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Login — Apex Ventures</title>
+
+<style>
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+body{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  font-family:Arial,sans-serif;
+  background:
+    radial-gradient(circle at top right,#17385f 0,#07172d 45%,#030b18 100%);
+  color:#f5f0e5;
+}
+
+.login-box{
+  width:100%;
+  max-width:430px;
+  padding:32px;
+  background:rgba(15,33,64,.92);
+  border:1px solid rgba(224,189,118,.25);
+  border-radius:20px;
+  box-shadow:0 25px 70px rgba(0,0,0,.45);
+  backdrop-filter:blur(15px);
+}
+
+.logo{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:8px;
+  font-size:1.55rem;
+  font-weight:bold;
+}
+
+.logo-dot{
+  width:11px;
+  height:11px;
+  border-radius:50%;
+  background:#e0bd76;
+  box-shadow:0 0 15px #e0bd76;
+}
+
+.subtitle{
+  color:#9fb0c9;
+  margin-bottom:28px;
+  font-size:.9rem;
+}
+
+h1{
+  font-size:1.8rem;
+  margin-bottom:8px;
+}
+
+label{
+  display:block;
+  margin:17px 0 7px;
+  color:#c4cede;
+  font-size:.88rem;
+}
+
+input{
+  width:100%;
+  padding:14px;
+  border-radius:10px;
+  border:1px solid #304768;
+  background:#081a33;
+  color:white;
+  outline:none;
+  font-size:15px;
+}
+
+input:focus{
+  border-color:#e0bd76;
+  box-shadow:0 0 0 2px rgba(224,189,118,.08);
+}
+
+.password-wrap{
+  position:relative;
+}
+
+.password-wrap input{
+  padding-right:70px;
+}
+
+.show-password{
+  position:absolute;
+  right:10px;
+  top:50%;
+  transform:translateY(-50%);
+  background:none;
+  border:0;
+  color:#e0bd76;
+  cursor:pointer;
+  font-size:12px;
+}
+
+.options{
+  display:flex;
+  justify-content:flex-end;
+  margin-top:10px;
+}
+
+.forgot{
+  color:#e0bd76;
+  text-decoration:none;
+  font-size:.84rem;
+}
+
+.forgot:hover{
+  text-decoration:underline;
+}
+
+.login-btn{
+  width:100%;
+  padding:15px;
+  margin-top:23px;
+  border:0;
+  border-radius:10px;
+  background:#c6a45c;
+  color:#07172d;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.login-btn:hover{
+  background:#e0bd76;
+}
+
+.login-btn:disabled{
+  opacity:.6;
+  cursor:not-allowed;
+}
+
+.message{
+  display:none;
+  margin-top:16px;
+  padding:12px;
+  border-radius:9px;
+  font-size:.85rem;
+  line-height:1.4;
+}
+
+.message.error{
+  display:block;
+  color:#ffaaa0;
+  background:rgba(217,122,108,.1);
+  border:1px solid #d97a6c;
+}
+
+.message.success{
+  display:block;
+  color:#8de0b0;
+  background:rgba(95,185,138,.1);
+  border:1px solid #5fb98a;
+}
+
+.register{
+  text-align:center;
+  margin-top:23px;
+  color:#9fb0c9;
+  font-size:.88rem;
+}
+
+.register a{
+  color:#e0bd76;
+  text-decoration:none;
+  font-weight:bold;
+}
+
+.secure{
+  text-align:center;
+  margin-top:22px;
+  color:#5f7291;
+  font-size:.72rem;
+}
+
+@media(max-width:480px){
+  .login-box{
+    padding:25px 20px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="login-box">
+
+  <div class="logo">
+    <span class="logo-dot"></span>
+    Apex Ventures
+  </div>
+
+  <p class="subtitle">
+    Secure Investor Portal
+  </p>
+
+  <h1>Welcome back</h1>
+
+  <p class="subtitle">
+    Login to access your wallet, investments and transactions.
+  </p>
+
+  <form id="loginForm">
+
+    <label for="email">
+      Email address
+    </label>
+
+    <input
+      id="email"
+      type="email"
+      placeholder="you@example.com"
+      autocomplete="email"
+      required
+    >
+
+    <label for="password">
+      Password
+    </label>
+
+    <div class="password-wrap">
+
+      <input
+        id="password"
+        type="password"
+        placeholder="Enter your password"
+        autocomplete="current-password"
+        required
+      >
+
+      <button
+        type="button"
+        class="show-password"
+        id="showPassword">
+        Show
+      </button>
+
+    </div>
+
+    <div class="options">
+      <a
+        href="forgot-password.html"
+        class="forgot">
+        Forgot password?
+      </a>
+    </div>
+
+    <button
+      type="submit"
+      class="login-btn"
+      id="loginBtn">
+      Login
+    </button>
+
+    <div
+      id="message"
+      class="message">
+    </div>
+
+  </form>
+
+  <div class="register">
+    Don't have an account?
+    <a href="register.html">Create account</a>
+  </div>
+
+  <div class="secure">
+    🔒 Protected by Apex Ventures authentication
+  </div>
+
+</div>
+
+
+<script>
+
+const API_BASE =
+  "https://YOUR-APEX-BACKEND.onrender.com/api/v1";
+
+const TOKEN_KEY =
+  "apex_token";
+
+
+const form =
+  document.getElementById("loginForm");
+
+const email =
+  document.getElementById("email");
+
+const password =
+  document.getElementById("password");
+
+const loginBtn =
+  document.getElementById("loginBtn");
+
+const message =
+  document.getElementById("message");
+
+const showPassword =
+  document.getElementById("showPassword");
+
+
+function showMessage(text,type){
+
+  message.textContent = text;
+
+  message.className =
+    "message " + type;
+
+}
+
+
+showPassword.addEventListener(
+  "click",
+  ()=>{
+
+    if(password.type === "password"){
+
+      password.type = "text";
+      showPassword.textContent = "Hide";
+
+    }else{
+
+      password.type = "password";
+      showPassword.textContent = "Show";
+
+    }
+
+  }
+);
+
+
+form.addEventListener(
+  "submit",
+  async (event)=>{
+
+    event.preventDefault();
+
+    const emailValue =
+      email.value.trim();
+
+    const passwordValue =
+      password.value;
+
+
+    if(!emailValue || !passwordValue){
+
+      showMessage(
+        "Please enter your email and password.",
+        "error"
+      );
+
+      return;
+
+    }
+
+
+    loginBtn.disabled = true;
+
+    loginBtn.textContent =
+      "Signing in...";
+
+
+    showMessage(
+      "Authenticating your account...",
+      "success"
+    );
+
+
+    try{
+
+      const response =
+        await fetch(
+          `${API_BASE}/auth/login`,
+          {
+            method:"POST",
+
+            headers:{
+              "Content-Type":
+                "application/json"
+            },
+
+            body:JSON.stringify({
+              email:emailValue,
+              password:passwordValue
+            })
+          }
+        );
+
+
+      const data =
+        await response.json()
+          .catch(()=>({}));
+
+
+      if(!response.ok){
+
+        throw new Error(
+          data.message ||
+          data.error ||
+          "Login failed."
+        );
+
+      }
+
+
+      /*
+       * Your backend should return:
+       *
+       * {
+       *   success: true,
+       *   accessToken: "JWT..."
+       * }
+       */
+
+      const token =
+        data.accessToken ||
+        data.token;
+
+
+      if(!token){
+
+        throw new Error(
+          "Login succeeded but the server did not return a JWT."
+        );
+
+      }
+
+
+      /*
+       * IMPORTANT:
+       * Dashboard and deposit.html
+       * both use this exact key.
+       */
+
+      localStorage.setItem(
+        TOKEN_KEY,
+        token
+      );
+
+
+      if(data.user){
+
+        localStorage.setItem(
+          "apex_user",
+          JSON.stringify(data.user)
+        );
+
+      }
+
+
+      showMessage(
+        "Login successful. Opening your dashboard...",
+        "success"
+      );
+
+
+      setTimeout(
+        ()=>{
+          window.location.href =
+            "dashboard.html";
+        },
+        600
+      );
+
+
+    }catch(error){
+
+      console.error(
+        "LOGIN ERROR:",
+        error
+      );
+
+
+      showMessage(
+        error.message ||
+        "Unable to connect to Apex Ventures.",
+        "error"
+      );
+
+
+      loginBtn.disabled = false;
+
+      loginBtn.textContent =
+        "Login";
+
+    }
+
+  }
+);
+
+</script>
+
+</body>
+  </html>
