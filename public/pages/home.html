@@ -1,0 +1,918 @@
+<!-- pages/home.html -->
+
+<style>
+.home{
+  display:flex;
+  flex-direction:column;
+  gap:22px;
+  animation:fadeUp .4s ease;
+}
+
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(12px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.welcome{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
+}
+
+.welcome h1{
+  font-size:2rem;
+  margin-bottom:5px;
+}
+
+.welcome p{
+  color:var(--text-secondary);
+  font-size:.9rem;
+}
+
+.online{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  color:var(--positive);
+  font-size:.75rem;
+}
+
+.online-dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:var(--positive);
+  box-shadow:0 0 10px var(--positive);
+}
+
+/* BALANCE */
+
+.balance-card{
+  position:relative;
+  overflow:hidden;
+  padding:28px;
+  border-radius:18px;
+  background:linear-gradient(
+    135deg,
+    var(--bg-card),
+    var(--bg-elevated)
+  );
+  border:1px solid var(--panel-border);
+}
+
+.balance-card::after{
+  content:"";
+  position:absolute;
+  width:180px;
+  height:180px;
+  right:-70px;
+  top:-90px;
+  border-radius:50%;
+  background:var(--brass);
+  opacity:.08;
+}
+
+.balance-title{
+  color:var(--text-secondary);
+  font-size:.75rem;
+  text-transform:uppercase;
+  letter-spacing:.1em;
+}
+
+.balance{
+  margin:10px 0 5px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:2.45rem;
+  font-weight:600;
+}
+
+.balance-sub{
+  color:var(--text-faint);
+  font-size:.75rem;
+}
+
+/* STATS */
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:14px;
+}
+
+.stat{
+  background:var(--bg-card);
+  border:1px solid var(--panel-border);
+  border-radius:14px;
+  padding:18px;
+}
+
+.stat-title{
+  color:var(--text-secondary);
+  font-size:.75rem;
+  margin-bottom:9px;
+}
+
+.stat-value{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:1rem;
+  font-weight:600;
+}
+
+.gold{color:var(--brass-bright)}
+.green{color:var(--positive)}
+.red{color:var(--negative)}
+
+/* ACTIONS */
+
+.actions{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:14px;
+}
+
+.action{
+  border:1px solid var(--panel-border);
+  background:var(--bg-card);
+  color:var(--text-primary);
+  border-radius:14px;
+  padding:18px;
+  cursor:pointer;
+  text-align:left;
+  transition:.2s;
+}
+
+.action:hover{
+  transform:translateY(-3px);
+  border-color:var(--brass);
+}
+
+.action-icon{
+  font-size:1.4rem;
+  margin-bottom:9px;
+  color:var(--brass-bright);
+}
+
+.action strong{
+  display:block;
+  margin-bottom:4px;
+}
+
+.action span{
+  color:var(--text-secondary);
+  font-size:.75rem;
+}
+
+/* PANELS */
+
+.panel{
+  background:var(--bg-card);
+  border:1px solid var(--panel-border);
+  border-radius:16px;
+  overflow:hidden;
+}
+
+.panel-head{
+  padding:18px 20px;
+  border-bottom:1px solid var(--panel-border);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.panel-head h2{
+  font-size:1.1rem;
+}
+
+.panel-btn{
+  border:0;
+  background:none;
+  color:var(--brass-bright);
+  cursor:pointer;
+  font-size:.78rem;
+}
+
+.table-wrap{
+  overflow-x:auto;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+th,td{
+  padding:14px 20px;
+  text-align:left;
+  border-bottom:1px solid var(--panel-border);
+  font-size:.8rem;
+}
+
+th{
+  color:var(--text-faint);
+  font-weight:500;
+}
+
+td{
+  color:var(--text-secondary);
+}
+
+td:first-child{
+  color:var(--text-primary);
+}
+
+.badge{
+  display:inline-block;
+  padding:5px 9px;
+  border-radius:20px;
+  font-size:.67rem;
+}
+
+.success{
+  color:var(--positive);
+  background:rgba(95,185,138,.1);
+}
+
+.pending{
+  color:var(--brass-bright);
+  background:rgba(198,164,92,.1);
+}
+
+.failed{
+  color:var(--negative);
+  background:rgba(217,122,108,.1);
+}
+
+.empty{
+  padding:35px 20px;
+  text-align:center;
+  color:var(--text-faint);
+  font-size:.82rem;
+}
+
+/* INVESTMENT */
+
+.investment{
+  padding:18px 20px;
+}
+
+.invest-item{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:14px 0;
+  border-bottom:1px solid var(--panel-border);
+}
+
+.invest-item:last-child{
+  border-bottom:0;
+}
+
+.invest-name{
+  font-weight:500;
+}
+
+.invest-status{
+  color:var(--text-faint);
+  font-size:.7rem;
+  margin-top:3px;
+}
+
+.invest-amount{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.8rem;
+}
+
+/* MOBILE */
+
+@media(max-width:800px){
+
+  .stats{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .actions{
+    grid-template-columns:1fr 1fr;
+  }
+
+}
+
+@media(max-width:550px){
+
+  .welcome h1{
+    font-size:1.55rem;
+  }
+
+  .balance{
+    font-size:2rem;
+  }
+
+  .stats{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .actions{
+    grid-template-columns:1fr;
+  }
+
+  th,td{
+    padding:13px 14px;
+  }
+
+}
+</style>
+
+
+<div class="home">
+
+  <!-- WELCOME -->
+
+  <div class="welcome">
+
+    <div>
+      <h1>Welcome back</h1>
+      <p>Manage your Apex Ventures account.</p>
+    </div>
+
+    <div class="online">
+      <span class="online-dot"></span>
+      Online
+    </div>
+
+  </div>
+
+
+  <!-- WALLET BALANCE -->
+
+  <div class="balance-card">
+
+    <div class="balance-title">
+      Available Wallet Balance
+    </div>
+
+    <div
+      class="balance"
+      id="homeBalance"
+    >
+      KES 0.00
+    </div>
+
+    <div class="balance-sub">
+      Your available funds
+    </div>
+
+  </div>
+
+
+  <!-- ACCOUNT STATS -->
+
+  <div class="stats">
+
+    <div class="stat">
+
+      <div class="stat-title">
+        Total Deposits
+      </div>
+
+      <div
+        class="stat-value gold"
+        id="homeDeposits"
+      >
+        KES 0.00
+      </div>
+
+    </div>
+
+
+    <div class="stat">
+
+      <div class="stat-title">
+        Total Invested
+      </div>
+
+      <div
+        class="stat-value"
+        id="homeInvested"
+      >
+        KES 0.00
+      </div>
+
+    </div>
+
+
+    <div class="stat">
+
+      <div class="stat-title">
+        Investment Profit
+      </div>
+
+      <div
+        class="stat-value green"
+        id="homeProfit"
+      >
+        KES 0.00
+      </div>
+
+    </div>
+
+
+    <div class="stat">
+
+      <div class="stat-title">
+        Investment Loss
+      </div>
+
+      <div
+        class="stat-value red"
+        id="homeLoss"
+      >
+        KES 0.00
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- QUICK ACTIONS -->
+
+  <div class="actions">
+
+    <button
+      class="action"
+      onclick="homeNavigate('deposit')"
+    >
+
+      <div class="action-icon">
+        ↓
+      </div>
+
+      <strong>
+        Deposit
+      </strong>
+
+      <span>
+        Add funds to your wallet
+      </span>
+
+    </button>
+
+
+    <button
+      class="action"
+      onclick="homeNavigate('withdrawal')"
+    >
+
+      <div class="action-icon">
+        ↑
+      </div>
+
+      <strong>
+        Withdraw
+      </strong>
+
+      <span>
+        Withdraw available funds
+      </span>
+
+    </button>
+
+
+    <button
+      class="action"
+      onclick="homeNavigate('invest')"
+    >
+
+      <div class="action-icon">
+        ◈
+      </div>
+
+      <strong>
+        Invest
+      </strong>
+
+      <span>
+        Explore investment plans
+      </span>
+
+    </button>
+
+  </div>
+
+
+  <!-- TRANSACTIONS -->
+
+  <section class="panel">
+
+    <div class="panel-head">
+
+      <h2>
+        Recent Transactions
+      </h2>
+
+      <button
+        class="panel-btn"
+        onclick="homeNavigate('overview')"
+      >
+        View all
+      </button>
+
+    </div>
+
+
+    <div class="table-wrap">
+
+      <table>
+
+        <thead>
+
+          <tr>
+            <th>Type</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Date</th>
+          </tr>
+
+        </thead>
+
+        <tbody id="homeTransactions">
+
+          <tr>
+            <td colspan="4">
+              <div class="empty">
+                No transactions yet
+              </div>
+            </td>
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+
+  <!-- INVESTMENT HISTORY -->
+
+  <section class="panel">
+
+    <div class="panel-head">
+
+      <h2>
+        Investment History
+      </h2>
+
+      <button
+        class="panel-btn"
+        onclick="homeNavigate('invest')"
+      >
+        Start investing
+      </button>
+
+    </div>
+
+
+    <div
+      class="investment"
+      id="homeInvestments"
+    >
+
+      <div class="empty">
+        No investments yet.
+      </div>
+
+    </div>
+
+  </section>
+
+</div>
+
+
+<script>
+(function(){
+
+  /* =========================================
+     NAVIGATION
+  ========================================= */
+
+  window.homeNavigate = function(page){
+
+    /*
+      Uses the navigation already created
+      by dashboard.html.
+    */
+
+    const button =
+      document.querySelector(
+        `.nav-item[data-page="${page}"]`
+      );
+
+    if(button){
+
+      button.click();
+
+      return;
+    }
+
+    /*
+      Fallback if the navigation item
+      isn't found.
+    */
+
+    window.location.hash = page;
+
+  };
+
+
+  /* =========================================
+     MONEY FORMAT
+  ========================================= */
+
+  function money(value){
+
+    return "KES " +
+      Number(value || 0).toLocaleString(
+        "en-KE",
+        {
+          minimumFractionDigits:2,
+          maximumFractionDigits:2
+        }
+      );
+
+  }
+
+
+  /* =========================================
+     ESCAPE HTML
+  ========================================= */
+
+  function escapeHTML(value){
+
+    return String(value ?? "")
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;")
+      .replace(/'/g,"&#039;");
+
+  }
+
+
+  /* =========================================
+     STATUS CLASS
+  ========================================= */
+
+  function statusClass(status){
+
+    const value =
+      String(status || "")
+      .toLowerCase();
+
+    if(
+      value === "success" ||
+      value === "successful" ||
+      value === "completed"
+    ){
+      return "success";
+    }
+
+    if(
+      value === "failed" ||
+      value === "cancelled"
+    ){
+      return "failed";
+    }
+
+    return "pending";
+
+  }
+
+
+  /* =========================================
+     TRANSACTIONS
+  ========================================= */
+
+  function renderTransactions(transactions){
+
+    const container =
+      document.getElementById(
+        "homeTransactions"
+      );
+
+    if(!transactions.length){
+
+      container.innerHTML = `
+        <tr>
+          <td colspan="4">
+            <div class="empty">
+              No transactions yet
+            </div>
+          </td>
+        </tr>
+      `;
+
+      return;
+
+    }
+
+
+    container.innerHTML =
+      transactions
+      .slice(0,8)
+      .map(transaction => {
+
+        const date =
+          transaction.createdAt
+          ? new Date(
+              transaction.createdAt
+            ).toLocaleDateString()
+          : "—";
+
+        return `
+          <tr>
+
+            <td>
+              ${escapeHTML(
+                transaction.type ||
+                transaction.description ||
+                "Transaction"
+              )}
+            </td>
+
+            <td class="mono">
+              ${money(
+                transaction.amount
+              )}
+            </td>
+
+            <td>
+
+              <span class="badge ${
+                statusClass(
+                  transaction.status
+                )
+              }">
+
+                ${escapeHTML(
+                  transaction.status ||
+                  "pending"
+                )}
+
+              </span>
+
+            </td>
+
+            <td>
+              ${date}
+            </td>
+
+          </tr>
+        `;
+
+      })
+      .join("");
+
+  }
+
+
+  /* =========================================
+     INVESTMENTS
+  ========================================= */
+
+  function renderInvestments(investments){
+
+    const container =
+      document.getElementById(
+        "homeInvestments"
+      );
+
+    if(!investments.length){
+
+      container.innerHTML = `
+        <div class="empty">
+          No investments yet.
+        </div>
+      `;
+
+      return;
+
+    }
+
+
+    container.innerHTML =
+      investments
+      .slice(0,6)
+      .map(investment => {
+
+        return `
+          <div class="invest-item">
+
+            <div>
+
+              <div class="invest-name">
+                ${escapeHTML(
+                  investment.plan ||
+                  "Investment"
+                )}
+              </div>
+
+              <div class="invest-status">
+                ${escapeHTML(
+                  investment.status ||
+                  "active"
+                )}
+              </div>
+
+            </div>
+
+            <div class="invest-amount">
+              ${money(
+                investment.amount
+              )}
+            </div>
+
+          </div>
+        `;
+
+      })
+      .join("");
+
+  }
+
+
+  /* =========================================
+     LOAD REAL DASHBOARD DATA
+  ========================================= */
+
+  async function loadHome(){
+
+    try{
+
+      const data =
+        await window.Apex.apiFetch(
+          "/dashboard"
+        );
+
+
+      document.getElementById(
+        "homeBalance"
+      ).textContent =
+        money(data.balance);
+
+
+      document.getElementById(
+        "homeDeposits"
+      ).textContent =
+        money(data.totalDeposits);
+
+
+      document.getElementById(
+        "homeInvested"
+      ).textContent =
+        money(data.totalInvested);
+
+
+      document.getElementById(
+        "homeProfit"
+      ).textContent =
+        money(data.totalProfit);
+
+
+      document.getElementById(
+        "homeLoss"
+      ).textContent =
+        money(data.totalLoss);
+
+
+      renderTransactions(
+        data.transactions || []
+      );
+
+
+      renderInvestments(
+        data.investments || []
+      );
+
+
+    }catch(error){
+
+      console.error(
+        "Apex dashboard error:",
+        error
+      );
+
+    }
+
+  }
+
+
+  /* =========================================
+     START
+  ========================================= */
+
+  loadHome();
+
+})();
+    </script>
