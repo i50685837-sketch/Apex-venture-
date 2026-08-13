@@ -1,0 +1,578 @@
+<section class="surveys-page">
+
+<style>
+.surveys-page{
+  width:100%;
+  color:var(--text-primary);
+}
+
+.surveys-page *{
+  box-sizing:border-box;
+}
+
+.sv-header{
+  margin-bottom:22px;
+}
+
+.sv-header h1{
+  font-size:2rem;
+  margin-bottom:7px;
+}
+
+.sv-header p{
+  color:var(--text-secondary);
+  font-size:.92rem;
+}
+
+.sv-stats{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:14px;
+  margin-bottom:24px;
+}
+
+.sv-stat{
+  background:var(--bg-card);
+  border:1px solid var(--panel-border);
+  border-radius:14px;
+  padding:18px;
+}
+
+.sv-stat-label{
+  color:var(--text-secondary);
+  font-size:.78rem;
+  margin-bottom:9px;
+}
+
+.sv-stat-value{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:1.25rem;
+  color:var(--brass-bright);
+  font-weight:600;
+}
+
+.sv-section-title{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:14px;
+}
+
+.sv-section-title h2{
+  font-size:1.25rem;
+}
+
+.sv-refresh{
+  border:1px solid var(--panel-border);
+  background:var(--bg-elevated);
+  color:var(--text-secondary);
+  padding:8px 12px;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+.sv-list{
+  display:grid;
+  gap:14px;
+}
+
+.sv-card{
+  background:var(--bg-card);
+  border:1px solid var(--panel-border);
+  border-radius:16px;
+  padding:18px;
+  transition:.2s ease;
+}
+
+.sv-card:hover{
+  border-color:var(--brass);
+  transform:translateY(-1px);
+}
+
+.sv-card-top{
+  display:flex;
+  justify-content:space-between;
+  gap:15px;
+  align-items:flex-start;
+}
+
+.sv-card h3{
+  font-size:1.05rem;
+  margin-bottom:7px;
+}
+
+.sv-description{
+  color:var(--text-secondary);
+  font-size:.85rem;
+  line-height:1.5;
+}
+
+.sv-reward{
+  white-space:nowrap;
+  color:var(--positive);
+  font-family:'IBM Plex Mono',monospace;
+  font-weight:600;
+}
+
+.sv-meta{
+  display:flex;
+  gap:15px;
+  flex-wrap:wrap;
+  margin:15px 0;
+  color:var(--text-faint);
+  font-size:.78rem;
+}
+
+.sv-start{
+  width:100%;
+  padding:12px;
+  border:0;
+  border-radius:9px;
+  background:var(--brass);
+  color:var(--navy-deep);
+  font-weight:600;
+  cursor:pointer;
+}
+
+.sv-start:hover{
+  background:var(--brass-bright);
+}
+
+.sv-start:disabled{
+  opacity:.6;
+  cursor:not-allowed;
+}
+
+.sv-empty{
+  text-align:center;
+  padding:50px 20px;
+  border:1px dashed var(--panel-border);
+  border-radius:15px;
+  color:var(--text-secondary);
+}
+
+.sv-error{
+  color:var(--negative);
+  text-align:center;
+  padding:25px;
+}
+
+.sv-loading{
+  text-align:center;
+  color:var(--text-secondary);
+  padding:35px;
+}
+
+@media(max-width:650px){
+  .sv-stats{
+    grid-template-columns:1fr;
+  }
+
+  .sv-card-top{
+    flex-direction:column;
+  }
+
+  .sv-reward{
+    white-space:normal;
+  }
+}
+</style>
+
+
+<div class="sv-header">
+  <h1>Surveys</h1>
+  <p>Complete available surveys and earn rewards.</p>
+</div>
+
+
+<div class="sv-stats">
+
+  <div class="sv-stat">
+    <div class="sv-stat-label">
+      Available Surveys
+    </div>
+
+    <div
+      class="sv-stat-value"
+      id="availableCount">
+      —
+    </div>
+  </div>
+
+
+  <div class="sv-stat">
+    <div class="sv-stat-label">
+      Survey Earnings
+    </div>
+
+    <div
+      class="sv-stat-value"
+      id="surveyEarnings">
+      KES 0
+    </div>
+  </div>
+
+
+  <div class="sv-stat">
+    <div class="sv-stat-label">
+      Completed
+    </div>
+
+    <div
+      class="sv-stat-value"
+      id="completedCount">
+      0
+    </div>
+  </div>
+
+</div>
+
+
+<div class="sv-section-title">
+
+  <h2>Available Surveys</h2>
+
+  <button
+    class="sv-refresh"
+    id="refreshBtn">
+    ↻ Refresh
+  </button>
+
+</div>
+
+
+<div
+  class="sv-list"
+  id="surveyList">
+
+  <div class="sv-loading">
+    Loading surveys...
+  </div>
+
+</div>
+
+
+<script>
+(function(){
+
+  const list =
+    document.getElementById("surveyList");
+
+  const available =
+    document.getElementById("availableCount");
+
+  const earnings =
+    document.getElementById("surveyEarnings");
+
+  const completed =
+    document.getElementById("completedCount");
+
+  const refresh =
+    document.getElementById("refreshBtn");
+
+
+  function money(value){
+
+    return "KES " +
+      Number(value || 0)
+      .toLocaleString("en-KE",{
+        minimumFractionDigits:0,
+        maximumFractionDigits:2
+      });
+
+  }
+
+
+  function escapeHTML(value){
+
+    return String(value ?? "")
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;")
+      .replace(/'/g,"&#039;");
+
+  }
+
+
+  function getArray(data){
+
+    if(Array.isArray(data))
+      return data;
+
+    if(Array.isArray(data.surveys))
+      return data.surveys;
+
+    if(Array.isArray(data.data))
+      return data.data;
+
+    return [];
+
+  }
+
+
+  async function loadSurveys(){
+
+    list.innerHTML =
+      `<div class="sv-loading">
+        Loading surveys...
+       </div>`;
+
+    refresh.disabled = true;
+
+    try{
+
+      const data =
+        await window.Apex.apiFetch(
+          "/surveys"
+        );
+
+      const surveys =
+        getArray(data);
+
+      available.textContent =
+        surveys.length;
+
+
+      if(data.earnings !== undefined){
+
+        earnings.textContent =
+          money(data.earnings);
+
+      }
+
+
+      if(data.completed !== undefined){
+
+        completed.textContent =
+          data.completed;
+
+      }
+
+
+      if(!surveys.length){
+
+        list.innerHTML =
+          `<div class="sv-empty">
+             <h3>No surveys available</h3>
+             <p>
+               Check again later for new earning opportunities.
+             </p>
+           </div>`;
+
+        return;
+
+      }
+
+
+      list.innerHTML =
+        surveys.map((survey,index)=>{
+
+          const id =
+            survey._id ||
+            survey.id ||
+            index;
+
+          const title =
+            survey.title ||
+            survey.name ||
+            "Apex Survey";
+
+
+          const description =
+            survey.description ||
+            "Complete this survey to earn a reward.";
+
+
+          const reward =
+            survey.reward ??
+            survey.amount ??
+            survey.points ??
+            0;
+
+
+          const minutes =
+            survey.duration ||
+            survey.time ||
+            "5–10 min";
+
+
+          const questions =
+            survey.questions ||
+            survey.questionCount ||
+            "—";
+
+
+          return `
+
+          <article class="sv-card">
+
+            <div class="sv-card-top">
+
+              <div>
+                <h3>
+                  ${escapeHTML(title)}
+                </h3>
+
+                <div class="sv-description">
+                  ${escapeHTML(description)}
+                </div>
+              </div>
+
+              <div class="sv-reward">
+                +${money(reward)}
+              </div>
+
+            </div>
+
+
+            <div class="sv-meta">
+
+              <span>
+                ⏱ ${escapeHTML(minutes)}
+              </span>
+
+              <span>
+                ✎ ${escapeHTML(questions)} questions
+              </span>
+
+            </div>
+
+
+            <button
+              class="sv-start"
+              data-id="${escapeHTML(id)}">
+
+              Start Survey
+
+            </button>
+
+          </article>
+
+          `;
+
+        }).join("");
+
+
+      document
+        .querySelectorAll(".sv-start")
+        .forEach(button=>{
+
+          button.addEventListener(
+            "click",
+            ()=>startSurvey(
+              button.dataset.id,
+              button
+            )
+          );
+
+        });
+
+
+    }catch(error){
+
+      console.error(
+        "Survey loading error:",
+        error
+      );
+
+      list.innerHTML =
+        `<div class="sv-error">
+          Failed to load surveys.
+          <br>
+          <small>
+            ${escapeHTML(error.message)}
+          </small>
+        </div>`;
+
+    }finally{
+
+      refresh.disabled = false;
+
+    }
+
+  }
+
+
+  async function startSurvey(id,button){
+
+    button.disabled = true;
+
+    button.textContent =
+      "Opening...";
+
+
+    try{
+
+      /*
+       * Ask backend for the survey.
+       *
+       * Expected:
+       * GET /surveys/:id
+       */
+
+      const data =
+        await window.Apex.apiFetch(
+          `/surveys/${encodeURIComponent(id)}`
+        );
+
+
+      /*
+       * If backend gives a URL,
+       * open that survey.
+       */
+
+      if(data.url){
+
+        window.location.href =
+          data.url;
+
+        return;
+
+      }
+
+
+      /*
+       * Otherwise use your local
+       * survey page.
+       */
+
+      sessionStorage.setItem(
+        "apex_current_survey",
+        JSON.stringify(data)
+      );
+
+      window.location.href =
+        `survey.html?id=${encodeURIComponent(id)}`;
+
+
+    }catch(error){
+
+      window.Apex.showToast(
+        error.message ||
+        "Unable to open survey.",
+        true
+      );
+
+      button.disabled = false;
+
+      button.textContent =
+        "Start Survey";
+
+    }
+
+  }
+
+
+  refresh.addEventListener(
+    "click",
+    loadSurveys
+  );
+
+
+  loadSurveys();
+
+})();
+</script>
+
+</section>
