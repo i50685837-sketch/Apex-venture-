@@ -1,0 +1,365 @@
+<style>
+  .page h1{ font-size:1.8rem; margin-bottom:6px; }
+  .page-sub{ color:var(--text-secondary); margin-bottom:22px; font-size:.95rem; }
+
+  .panel{ background:var(--bg-card); border:1px solid var(--panel-border); border-radius:12px; padding:24px; margin-bottom:20px; }
+  ul.simple-list{ list-style:none; }
+  ul.simple-list li{ display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--panel-border); font-size:.9rem; color:var(--text-secondary); }
+  ul.simple-list li:last-child{ border-bottom:none; }
+  .empty{ color:var(--text-faint); font-size:.88rem; padding:16px 0; text-align:center; }
+
+  /* ---------- Wizard shell ---------- */
+  .wizard{ background:var(--bg-card); border:1px solid var(--panel-border); border-radius:16px; padding:28px; overflow:hidden; position:relative; }
+
+  .step-track{ display:flex; align-items:center; gap:6px; margin-bottom:28px; }
+  .step-dot-wrap{ display:flex; flex-direction:column; align-items:center; flex:1; }
+  .step-dot{
+    width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono', monospace; font-size:.85rem; font-weight:600; color:#fff;
+    background:var(--bg-elevated); border:2px solid var(--panel-border); color:var(--text-faint);
+    transition:all .3s ease; z-index:2;
+  }
+  .step-dot.done{ background:var(--step-color); border-color:var(--step-color); color:#0b1b34; }
+  .step-dot.current{ border-color:var(--step-color); color:var(--step-color); box-shadow:0 0 0 4px color-mix(in srgb, var(--step-color) 22%, transparent); }
+  .step-label{ font-size:.68rem; margin-top:8px; color:var(--text-faint); text-align:center; letter-spacing:.02em; }
+  .step-label.active{ color:var(--text-primary); font-weight:600; }
+  .step-line{ flex:1; height:2px; background:var(--panel-border); margin-top:-24px; position:relative; top:-16px; }
+  .step-line.done{ background:var(--step-color); }
+
+  .step-panel{ display:none; animation:slideIn .35s ease; }
+  .step-panel.active{ display:block; }
+  @keyframes slideIn{ from{ opacity:0; transform:translateX(14px);} to{ opacity:1; transform:translateX(0);} }
+
+  .step-heading{ display:flex; align-items:center; gap:10px; margin-bottom:6px; }
+  .step-badge{ width:30px; height:30px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:1rem; background:var(--step-color); color:#0b1b34; }
+  .step-heading h2{ font-size:1.15rem; }
+  .step-hint{ font-size:.83rem; color:var(--text-faint); margin-bottom:20px; }
+
+  .form-row{ display:flex; gap:12px; flex-wrap:wrap; margin-bottom:14px; }
+  .form-field{ flex:1; min-width:180px; }
+  .form-field label{ display:block; font-size:.78rem; color:var(--text-secondary); margin-bottom:6px; }
+  .form-field input, .form-field select, .form-field textarea{
+    width:100%; padding:11px 12px; border-radius:8px; background:var(--bg-elevated);
+    border:1px solid var(--panel-border); color:var(--text-primary); font-size:.92rem;
+    font-family:'IBM Plex Sans', sans-serif; transition:border-color .2s ease;
+  }
+  .form-field input:focus, .form-field select:focus, .form-field textarea:focus{
+    outline:none; border-color:var(--step-color);
+  }
+  .form-field textarea{ resize:vertical; min-height:70px; }
+
+  .ref-card{
+    border:1px solid var(--panel-border); border-left:4px solid var(--ref-color, var(--step-color));
+    border-radius:10px; padding:16px; margin-bottom:14px; background:var(--bg-elevated);
+  }
+  .ref-card-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+  .ref-card-head .ref-label{ font-size:.85rem; font-weight:600; color:var(--ref-color, var(--step-color)); }
+  .ref-remove{ background:none; border:none; color:var(--text-faint); cursor:pointer; font-size:.8rem; }
+  .ref-remove:hover{ color:var(--negative); }
+  .add-ref-btn{
+    padding:9px 16px; border-radius:8px; border:1px dashed var(--panel-border); background:transparent;
+    color:var(--text-secondary); cursor:pointer; font-size:.85rem; width:100%; margin-bottom:6px;
+  }
+  .add-ref-btn:hover{ border-color:var(--step-color); color:var(--step-color); }
+
+  .plan-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:10px; margin-bottom:18px; }
+  .period-card{
+    border:1px solid var(--panel-border); border-radius:10px; padding:14px 10px; text-align:center; cursor:pointer;
+    background:var(--bg-elevated); transition:all .2s ease;
+  }
+  .period-card.selected{ border-color:var(--step-color); box-shadow:0 0 0 3px color-mix(in srgb, var(--step-color) 18%, transparent); }
+  .period-card .num{ font-family:'IBM Plex Mono', monospace; font-size:1.2rem; color:var(--step-color); }
+  .period-card .label{ font-size:.72rem; color:var(--text-faint); margin-top:4px; }
+
+  .review-block{ background:var(--bg-elevated); border:1px solid var(--panel-border); border-radius:10px; padding:16px 18px; margin-bottom:12px; }
+  .review-block h4{ font-size:.82rem; color:var(--step-color); text-transform:uppercase; letter-spacing:.05em; margin-bottom:10px; }
+  .review-row{ display:flex; justify-content:space-between; font-size:.87rem; padding:6px 0; color:var(--text-secondary); border-bottom:1px solid var(--panel-border); }
+  .review-row:last-child{ border-bottom:none; }
+  .review-row span:last-child{ color:var(--text-primary); text-align:right; }
+
+  .checkbox-row{ display:flex; align-items:flex-start; gap:10px; margin:18px 0; font-size:.85rem; color:var(--text-secondary); }
+  .checkbox-row input{ margin-top:3px; accent-color:var(--step-color); }
+
+  .wizard-nav{ display:flex; justify-content:space-between; align-items:center; margin-top:26px; gap:12px; }
+  .btn{ padding:12px 22px; border-radius:8px; border:none; cursor:pointer; font-weight:600; font-size:.9rem; transition:transform .15s ease, background .2s ease; }
+  .btn:active{ transform:scale(.97); }
+  .btn-next{ background:var(--step-color); color:#0b1b34; }
+  .btn-next:hover{ filter:brightness(1.08); }
+  .btn-back{ background:transparent; border:1px solid var(--panel-border); color:var(--text-secondary); }
+  .btn-back:hover{ color:var(--text-primary); border-color:var(--text-secondary); }
+  .btn:disabled{ opacity:.55; cursor:not-allowed; }
+
+  .status-line{ font-size:.85rem; margin-top:14px; }
+  .status-line.pending{ color:var(--text-secondary); }
+  .status-line.success{ color:var(--positive); }
+  .status-line.error{ color:var(--negative); }
+
+  .field-error-msg{ font-size:.78rem; color:var(--negative); margin-top:10px; }
+
+  @media (max-width:560px){ .step-label{ display:none; } }
+</style>
+
+<section class="page">
+  <h1>Borrow / Loan</h1>
+  <p class="page-sub">Apply in a few quick steps.</p>
+
+  <!-- ============ ACTIVE LOANS ============ -->
+  <div class="panel">
+    <h2 style="font-size:1.1rem; margin-bottom:14px;">Active loans</h2>
+    <ul class="simple-list" id="loanList"><li class="empty">Loading…</li></ul>
+  </div>
+
+  <!-- ============ WIZARD ============ -->
+  <div class="wizard" id="wizard" style="--step-color:#5fb9a8;">
+
+    <div class="step-track" id="stepTrack"></div>
+
+    <form id="loanForm">
+
+      <!-- STEP 1 — Personal & DOB -->
+      <div class="step-panel active" data-step="1" style="--step-color:#5fb9a8;">
+        <div class="step-heading"><div class="step-badge">👤</div><h2>Personal details</h2></div>
+        <p class="step-hint">Let's start with who you are.</p>
+
+        <div class="form-row">
+          <div class="form-field"><label>Full name *</label><input type="text" id="fullName" required></div>
+          <div class="form-field"><label>National ID number *</label><input type="text" id="idNumber" inputmode="numeric" required></div>
+        </div>
+        <div class="form-row">
+          <div class="form-field"><label>Email *</label><input type="email" id="email" required></div>
+          <div class="form-field"><label>Phone number *</label><input type="tel" id="phone" placeholder="07XX XXX XXX" required></div>
+        </div>
+        <div class="form-row">
+          <div class="form-field"><label>Date of birth *</label><input type="date" id="dob" required></div>
+          <div class="form-field">
+            <label>Gender</label>
+            <select id="gender"><option value="">Prefer not to say</option><option value="female">Female</option><option value="male">Male</option><option value="other">Other</option></select>
+          </div>
+          <div class="form-field">
+            <label>Marital status</label>
+            <select id="maritalStatus"><option value="single">Single</option><option value="married">Married</option><option value="divorced">Divorced</option><option value="widowed">Widowed</option></select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-field"><label>County / Region *</label><input type="text" id="county" required></div>
+          <div class="form-field"><label>Town / Estate *</label><input type="text" id="town" required></div>
+        </div>
+        <div class="form-row">
+          <div class="form-field"><label>Employment status *</label>
+            <select id="employmentStatus" required>
+              <option value="employed">Employed</option><option value="self_employed">Self-employed</option>
+              <option value="business_owner">Business owner</option><option value="unemployed">Unemployed</option><option value="student">Student</option>
+            </select>
+          </div>
+          <div class="form-field"><label>Monthly income (KES) *</label><input type="number" id="monthlyIncome" min="0" required></div>
+        </div>
+      </div>
+
+      <!-- STEP 2 — Family & Friends / Next of kin -->
+      <div class="step-panel" data-step="2" style="--step-color:#e08fd0;">
+        <div class="step-heading"><div class="step-badge">👨‍👩‍👧‍👦</div><h2>Family & friends</h2></div>
+        <p class="step-hint">Add people who can vouch for you — father, mother, siblings, cousins, friends, workmates. At least 3 required.</p>
+
+        <div id="referencesContainer"></div>
+        <button type="button" class="add-ref-btn" id="addReferenceBtn">+ Add another person</button>
+      </div>
+
+      <!-- STEP 3 — Loan amount -->
+      <div class="step-panel" data-step="3" style="--step-color:#e0bd5f;">
+        <div class="step-heading"><div class="step-badge">💰</div><h2>Loan amount</h2></div>
+        <p class="step-hint">How much do you need, and for how long?</p>
+
+        <div class="form-row">
+          <div class="form-field"><label>Loan amount (KES) *</label><input type="number" id="loanAmount" min="1" required></div>
+        </div>
+
+        <label style="display:block; font-size:.78rem; color:var(--text-secondary); margin-bottom:8px;">Repayment period *</label>
+        <div class="plan-grid" id="periodGrid">
+          <div class="period-card" data-months="1"><div class="num">1</div><div class="label">month</div></div>
+          <div class="period-card" data-months="3"><div class="num">3</div><div class="label">months</div></div>
+          <div class="period-card" data-months="6"><div class="num">6</div><div class="label">months</div></div>
+          <div class="period-card" data-months="12"><div class="num">12</div><div class="label">months</div></div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-field"><label>Purpose of loan *</label><textarea id="loanPurpose" required></textarea></div>
+        </div>
+      </div>
+
+      <!-- STEP 4 — Review & submit -->
+      <div class="step-panel" data-step="4" style="--step-color:#6fb0e0;">
+        <div class="step-heading"><div class="step-badge">✅</div><h2>Review & submit</h2></div>
+        <p class="step-hint">Check everything below before sending your application.</p>
+
+        <div id="reviewContent"></div>
+
+        <div class="checkbox-row">
+          <input type="checkbox" id="consentCheck" required>
+          <label for="consentCheck">I confirm the information provided is accurate, and I authorize Apex Ventures to verify these details, including with the people listed above.</label>
+        </div>
+
+        <div class="field-error-msg" id="submitError" style="display:none;"></div>
+      </div>
+
+      <div class="wizard-nav">
+        <button type="button" class="btn btn-back" id="backBtn" style="visibility:hidden;">← Back</button>
+        <button type="button" class="btn btn-next" id="nextBtn">Next →</button>
+        <button type="submit" class="btn btn-next" id="submitBtn" style="display:none;">Submit application</button>
+      </div>
+      <div class="status-line" id="loanStatus"></div>
+    </form>
+  </div>
+</section>
+
+<script>
+(() => {
+  const { apiFetch, formatCurrency, showToast } = window.Apex;
+
+  /* ---------- Active loans ---------- */
+  async function loadActiveLoans() {
+    const list = document.getElementById("loanList");
+    try {
+      const loans = await apiFetch("/loans"); // [{ id, amount, dueInDays, status }]
+      list.innerHTML = loans.length
+        ? loans.map(l => `<li><span>${formatCurrency(l.amount)} — ${l.status}</span><span class="mono">Due in ${l.dueInDays}d</span></li>`).join("")
+        : `<li class="empty">No active loans.</li>`;
+    } catch (err) {
+      list.innerHTML = `<li class="empty">Couldn't load loans.</li>`;
+    }
+  }
+  loadActiveLoans();
+
+  /* ---------- Step colors + track ---------- */
+  const steps = [
+    { n: 1, label: "Personal", color: "#5fb9a8" },
+    { n: 2, label: "Family & friends", color: "#e08fd0" },
+    { n: 3, label: "Loan amount", color: "#e0bd5f" },
+    { n: 4, label: "Review", color: "#6fb0e0" }
+  ];
+  let current = 1;
+
+  const track = document.getElementById("stepTrack");
+  function renderTrack() {
+    track.innerHTML = steps.map((s, i) => `
+      <div class="step-dot-wrap" style="--step-color:${s.color}">
+        <div class="step-dot ${s.n < current ? "done" : ""} ${s.n === current ? "current" : ""}">${s.n < current ? "✓" : s.n}</div>
+        <div class="step-label ${s.n === current ? "active" : ""}">${s.label}</div>
+      </div>
+      ${i < steps.length - 1 ? `<div class="step-line ${s.n < current ? "done" : ""}" style="--step-color:${s.color}"></div>` : ""}
+    `).join("");
+  }
+  renderTrack();
+
+  function goToStep(n) {
+    current = n;
+    document.querySelectorAll(".step-panel").forEach(p => p.classList.toggle("active", Number(p.dataset.step) === n));
+    document.getElementById("backBtn").style.visibility = n === 1 ? "hidden" : "visible";
+    document.getElementById("nextBtn").style.display = n === steps.length ? "none" : "inline-block";
+    document.getElementById("submitBtn").style.display = n === steps.length ? "inline-block" : "none";
+    if (n === steps.length) renderReview();
+    renderTrack();
+    document.getElementById("wizard").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  document.getElementById("backBtn").addEventListener("click", () => goToStep(current - 1));
+  document.getElementById("nextBtn").addEventListener("click", () => {
+    if (!validateStep(current)) return;
+    goToStep(current + 1);
+  });
+
+  /* ---------- Step 1 required fields ---------- */
+  const step1Fields = ["fullName","idNumber","email","phone","dob","county","town","employmentStatus","monthlyIncome"];
+
+  /* ---------- Step 2: reference cards ---------- */
+  const relationships = ["Father", "Mother", "Sibling", "Spouse", "Friend", "Cousin", "Workmate", "Other"];
+  const refColors = { Father:"#5fb9a8", Mother:"#e08fd0", Sibling:"#e0bd5f", Spouse:"#e08f6f", Friend:"#6fb0e0", Cousin:"#a0e05f", Workmate:"#c68fe0", Other:"#9fb0c9" };
+  const refsContainer = document.getElementById("referencesContainer");
+  let refCount = 0;
+
+  function addReferenceRow(prefill = "") {
+    refCount++;
+    const id = refCount;
+    const wrapper = document.createElement("div");
+    wrapper.className = "ref-card";
+    wrapper.dataset.refId = id;
+    wrapper.style.setProperty("--ref-color", refColors[prefill] || "#e08fd0");
+    wrapper.innerHTML = `
+      <div class="ref-card-head"><span class="ref-label">Person ${id}</span><button type="button" class="ref-remove" data-remove="${id}">Remove</button></div>
+      <div class="form-row">
+        <div class="form-field"><label>Relationship *</label>
+          <select class="ref-relationship" required>
+            <option value="">Select</option>
+            ${relationships.map(r => `<option value="${r}" ${r === prefill ? "selected" : ""}>${r}</option>`).join("")}
+          </select>
+        </div>
+        <div class="form-field"><label>Full name *</label><input type="text" class="ref-name" required></div>
+      </div>
+      <div class="form-row">
+        <div class="form-field"><label>Phone number *</label><input type="tel" class="ref-phone" placeholder="07XX XXX XXX" required></div>
+        <div class="form-field"><label>Location</label><input type="text" class="ref-location" placeholder="Town / area"></div>
+      </div>
+    `;
+    refsContainer.appendChild(wrapper);
+
+    wrapper.querySelector(".ref-relationship").addEventListener("change", (e) => {
+      wrapper.style.setProperty("--ref-color", refColors[e.target.value] || "#e08fd0");
+    });
+    wrapper.querySelector(`[data-remove="${id}"]`).addEventListener("click", () => {
+      if (refsContainer.children.length <= 1) { showToast("At least one reference is required", true); return; }
+      wrapper.remove();
+    });
+  }
+  ["Father", "Mother", "Friend"].forEach(addReferenceRow);
+  document.getElementById("addReferenceBtn").addEventListener("click", () => addReferenceRow());
+
+  function collectReferences() {
+    return Array.from(refsContainer.querySelectorAll(".ref-card")).map(card => ({
+      relationship: card.querySelector(".ref-relationship").value,
+      fullName: card.querySelector(".ref-name").value.trim(),
+      phone: card.querySelector(".ref-phone").value.trim(),
+      location: card.querySelector(".ref-location").value.trim()
+    }));
+  }
+
+  /* ---------- Step 3: period cards ---------- */
+  let selectedPeriod = null;
+  document.querySelectorAll(".period-card").forEach(card => {
+    card.addEventListener("click", () => {
+      document.querySelectorAll(".period-card").forEach(c => c.classList.remove("selected"));
+      card.classList.add("selected");
+      selectedPeriod = card.dataset.months;
+    });
+  });
+
+  /* ---------- Validation per step ---------- */
+  function validateStep(n) {
+    const status = document.getElementById("loanStatus");
+    status.textContent = ""; status.className = "status-line";
+
+    if (n === 1) {
+      const missing = step1Fields.some(id => !document.getElementById(id).value);
+      if (missing) { status.textContent = "Please fill in all required personal details."; status.className = "status-line error"; return false; }
+    }
+    if (n === 2) {
+      const refs = collectReferences();
+      if (refs.length < 3) { status.textContent = "Add at least 3 people who can vouch for you."; status.className = "status-line error"; return false; }
+      if (refs.some(r => !r.relationship || !r.fullName || !r.phone)) { status.textContent = "Fill in relationship, name, and phone for each person."; status.className = "status-line error"; return false; }
+    }
+    if (n === 3) {
+      const amount = Number(document.getElementById("loanAmount").value);
+      const purpose = document.getElementById("loanPurpose").value.trim();
+      if (!amount || amount <= 0) { status.textContent = "Enter a loan amount."; status.className = "status-line error"; return false; }
+      if (!selectedPeriod) { status.textContent = "Choose a repayment period."; status.className = "status-line error"; return false; }
+      if (!purpose) { status.textContent = "Tell us the purpose of the loan."; status.className = "status-line error"; return false; }
+    }
+    return true;
+  }
+
+  /* ---------- Review screen ---------- */
+  function renderReview() {
+    const refs = collectReferences();
+    const el = document.getElementById("reviewContent");
+    el.innerHTML = `
+      <div class="review-block" style="--step-color:#5fb9a8;">
+        <h4>Personal</h4>
+        
