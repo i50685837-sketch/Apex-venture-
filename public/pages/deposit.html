@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Apex Ventures — Deposit</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+  font-family:Arial,sans-serif;
+  background:#07172d;
+  color:#f5f0e5;
+  padding:22px;
+}
+
+.container{
+  max-width:520px;
+  margin:auto;
+}
+
+h1{
+  color:#e0bd76;
+  margin-bottom:8px;
+}
+
+.subtitle{
+  color:#9fb0c9;
+  margin-bottom:25px;
+}
+
+.card{
+  background:#102646;
+  border:1px solid rgba(224,189,118,.2);
+  border-radius:18px;
+  padding:22px;
+  box-shadow:0 15px 40px rgba(0,0,0,.25);
+}
+
+label{
+  display:block;
+  margin:16px 0 7px;
+  color:#b9c5d8;
+}
+
+input{
+  width:100%;
+  padding:14px;
+  border-radius:10px;
+  border:1px solid #304768;
+  background:#081a33;
+  color:white;
+  outline:none;
+}
+
+input:focus{
+  border-color:#e0bd76;
+}
+
+button{
+  width:100%;
+  padding:15px;
+  margin-top:22px;
+  border:0;
+  border-radius:11px;
+  background:#c6a45c;
+  color:#07172d;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+button:disabled{
+  opacity:.6;
+  cursor:not-allowed;
+}
+
+.status{
+  margin-top:18px;
+  padding:13px;
+  border-radius:10px;
+  display:none;
+  line-height:1.5;
+}
+
+.success{
+  display:block;
+  background:rgba(95,185,138,.12);
+  border:1px solid #5fb98a;
+  color:#8de0b0;
+}
+
+.error{
+  display:block;
+  background:rgba(217,122,108,.12);
+  border:1px solid #d97a6c;
+  color:#ffaaa0;
+}
+
+.info{
+  display:block;
+  background:rgba(224,189,118,.1);
+  border:1px solid #c6a45c;
+  color:#e0bd76;
+}
+
+.back{
+  display:inline-block;
+  margin-bottom:20px;
+  color:#e0bd76;
+  text-decoration:none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<a href="dashboard.html" class="back">← Back to Dashboard</a>
+
+<h1>Deposit Funds</h1>
+<p class="subtitle">Add money to your Apex Ventures wallet using M-Pesa.</p>
+
+<div class="card">
+
+<label for="phone">M-Pesa Phone Number</label>
+<input
+  id="phone"
+  type="tel"
+  placeholder="07XXXXXXXX"
+  autocomplete="tel"
+>
+
+<label for="amount">Amount (KES)</label>
+<input
+  id="amount"
+  type="number"
+  min="10"
+  placeholder="Enter amount"
+>
+
+<button id="depositBtn">
+  Request M-Pesa STK
+</button>
+
+<div id="status" class="status"></div>
+
+</div>
+</div>
+
+<script>
+
+const API_BASE =
+  "https://YOUR-APEX-BACKEND.onrender.com/api/v1";
+
+/*
+  JWT token created during login.
+*/
+const token =
+  localStorage.getItem("apex_token");
+
+const phoneInput =
+  document.getElementById("phone");
+
+const amountInput =
+  document.getElementById("amount");
+
+const button =
+  document.getElementById("depositBtn");
+
+const statusBox =
+  document.getElementById("status");
+
+
+function showStatus(message,type){
+
+  statusBox.className =
+    "status " + type;
+
+  statusBox.textContent =
+    message;
+}
+
+
+function normalizePhone(phone){
+
+  phone = phone.trim();
+
+  if(phone.startsWith("07")){
+    return "254" + phone.substring(1);
+  }
+
+  if(phone.startsWith("01")){
+    return "254" + phone.substring(1);
+  }
+
+  if(phone.startsWith("+254")){
+    return phone.substring(1);
+  }
+
+  if(phone.startsWith("254")){
+    return phone;
+  }
+
+  return null;
+}
+
+
+button.addEventListener("click", async ()=>{
+
+  const phone =
+    normalizePhone(phoneInput.value);
+
+  const amount =
+    Number(amountInput.value);
+
+
+  if(!phone){
+
+    showStatus(
+      "Enter a valid Kenyan M-Pesa number.",
+      "error"
+    );
+
+    return;
+  }
+
+
+  if(!amount || amount < 10){
+
+    showStatus(
+      "Enter a valid deposit amount.",
+      "error"
+    );
+
+    return;
+  }
+
+
+  if(!token){
+
+    showStatus(
+      "Your login session has expired. Please login again.",
+      "error"
+    );
+
+    setTimeout(()=>{
+      location.href="login.html";
+    },1500);
+
+    return;
+  }
+
+
+  button.disabled = true;
+
+  button.textContent =
+    "Sending STK request...";
+
+
+  showStatus(
+    "Connecting to M-Pesa...",
+    "info"
+  );
+
+
+  try{
+
+    const response = await fetch(
+      `${API_BASE}/payments/mpesa/stk`,
+      {
+        method:"POST",
+
+        headers:{
+          "Content-Type":"application/json",
+          "Authorization":
+            `Bearer ${token}`
+        },
+
+        body:JSON.stringify({
+          phone,
+          amount
+        })
+      }
+    );
+
+
+    const data =
+      await response.json()
+        .catch(()=>({}));
+
+
+    if(!response.ok){
+
+      throw new Error(
+        data.message ||
+        data.error ||
+        `Server error ${response.status}`
+      );
+    }
+
+
+    if(
+      data.success === false ||
+      data.ResponseCode === "1"
+    ){
+
+      throw new Error(
+        data.message ||
+        "M-Pesa STK request failed."
+      );
+    }
+
+
+    showStatus(
+      "✅ STK Push sent. Check your M-Pesa phone and enter your M-Pesa PIN.",
+      "success"
+    );
+
+
+    button.textContent =
+      "STK Sent ✓";
+
+
+  }catch(error){
+
+    console.error(
+      "STK ERROR:",
+      error
+    );
+
+
+    showStatus(
+      "❌ Failed to fetch STK push: " +
+      error.message,
+      "error"
+    );
+
+
+    button.disabled = false;
+
+    button.textContent =
+      "Try Again";
+  }
+
+});
+
+</script>
+
+</body>
+</html>
