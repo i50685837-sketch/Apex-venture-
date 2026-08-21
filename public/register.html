@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Create Account</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #f4f7fb;
+      padding: 20px;
+    }
+
+    .register-box {
+      width: 100%;
+      max-width: 430px;
+      background: white;
+      padding: 30px;
+      border-radius: 18px;
+      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #777;
+      margin-bottom: 25px;
+    }
+
+    .input-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 7px;
+      font-weight: 600;
+    }
+
+    input {
+      width: 100%;
+      padding: 13px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      outline: none;
+      font-size: 15px;
+    }
+
+    input:focus {
+      border-color: #2563eb;
+    }
+
+    .terms {
+      display: flex;
+      gap: 9px;
+      align-items: flex-start;
+      margin: 18px 0;
+      font-size: 13px;
+      color: #555;
+    }
+
+    .terms input {
+      width: auto;
+      margin-top: 2px;
+    }
+
+    .terms a {
+      color: #2563eb;
+      text-decoration: none;
+    }
+
+    button {
+      width: 100%;
+      border: none;
+      padding: 14px;
+      border-radius: 10px;
+      background: #2563eb;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .message {
+      display: none;
+      margin-bottom: 15px;
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .error {
+      display: block;
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .success {
+      display: block;
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .login-link {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 14px;
+    }
+
+    .login-link a {
+      color: #2563eb;
+      text-decoration: none;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="register-box">
+
+    <h1>Create Account</h1>
+
+    <p class="subtitle">
+      Join us and get started
+    </p>
+
+    <div id="message" class="message"></div>
+
+    <form id="registerForm">
+
+      <!-- NAME -->
+      <div class="input-group">
+        <label for="name">Full Name</label>
+
+        <input
+          type="text"
+          id="name"
+          name="name"
+          placeholder="Enter your full name"
+          required
+        >
+      </div>
+
+      <!-- EMAIL -->
+      <div class="input-group">
+        <label for="email">Email Address</label>
+
+        <input
+          type="email"
+          id="email"
+          name="email"
+          placeholder="Enter your email"
+          required
+        >
+      </div>
+
+      <!-- PHONE -->
+      <div class="input-group">
+        <label for="phone">Phone Number</label>
+
+        <input
+          type="tel"
+          id="phone"
+          name="phone"
+          placeholder="e.g. 0712345678"
+          required
+        >
+      </div>
+
+      <!-- PASSWORD -->
+      <div class="input-group">
+        <label for="password">New Password</label>
+
+        <input
+          type="password"
+          id="password"
+          name="password"
+          placeholder="Minimum 8 characters"
+          minlength="8"
+          required
+        >
+      </div>
+
+      <!-- CONFIRM PASSWORD -->
+      <div class="input-group">
+        <label for="confirmPassword">
+          Confirm Password
+        </label>
+
+        <input
+          type="password"
+          id="confirmPassword"
+          name="confirmPassword"
+          placeholder="Confirm your password"
+          minlength="8"
+          required
+        >
+      </div>
+
+      <!-- TERMS -->
+      <div class="terms">
+
+        <input
+          type="checkbox"
+          id="terms"
+          required
+        >
+
+        <label for="terms">
+          I agree to the
+          <a href="/terms" target="_blank">
+            Terms and Conditions
+          </a>
+          and
+          <a href="/privacy" target="_blank">
+            Privacy Policy
+          </a>.
+        </label>
+
+      </div>
+
+      <button
+        type="submit"
+        id="registerBtn"
+      >
+        Create Account
+      </button>
+
+    </form>
+
+    <div class="login-link">
+      Already have an account?
+      <a href="/login">Login</a>
+    </div>
+
+  </div>
+
+  <script>
+
+    const form =
+      document.getElementById("registerForm");
+
+    const message =
+      document.getElementById("message");
+
+    const registerBtn =
+      document.getElementById("registerBtn");
+
+    function showMessage(text, type) {
+
+      message.textContent = text;
+
+      message.className =
+        "message " + type;
+    }
+
+    form.addEventListener(
+      "submit",
+      async function (event) {
+
+        event.preventDefault();
+
+        const name =
+          document.getElementById("name")
+            .value.trim();
+
+        const email =
+          document.getElementById("email")
+            .value.trim();
+
+        const phone =
+          document.getElementById("phone")
+            .value.trim();
+
+        const password =
+          document.getElementById("password")
+            .value;
+
+        const confirmPassword =
+          document.getElementById("confirmPassword")
+            .value;
+
+        const terms =
+          document.getElementById("terms")
+            .checked;
+
+        /* PASSWORD CHECK */
+
+        if (password.length < 8) {
+
+          showMessage(
+            "Password must be at least 8 characters.",
+            "error"
+          );
+
+          return;
+        }
+
+        /* CONFIRM PASSWORD */
+
+        if (password !== confirmPassword) {
+
+          showMessage(
+            "Passwords do not match.",
+            "error"
+          );
+
+          return;
+        }
+
+        /* TERMS */
+
+        if (!terms) {
+
+          showMessage(
+            "Please accept the Terms and Conditions.",
+            "error"
+          );
+
+          return;
+        }
+
+        registerBtn.disabled = true;
+
+        registerBtn.textContent =
+          "Creating account...";
+
+        try {
+
+          const response =
+            await fetch(
+              "/api/auth/register",
+              {
+                method: "POST",
+
+                headers: {
+                  "Content-Type":
+                    "application/json"
+                },
+
+                body: JSON.stringify({
+                  name,
+                  email,
+                  phone,
+                  password
+                })
+              }
+            );
+
+          const data =
+            await response.json();
+
+          if (!response.ok) {
+
+            throw new Error(
+              data.message ||
+              "Registration failed"
+            );
+          }
+
+          showMessage(
+            "Account created successfully. Redirecting...",
+            "success"
+          );
+
+          setTimeout(() => {
+
+            window.location.href =
+              "/login";
+
+          }, 1200);
+
+        } catch (error) {
+
+          console.error(
+            "Registration error:",
+            error
+          );
+
+          showMessage(
+            error.message ||
+            "Failed to connect to server.",
+            "error"
+          );
+
+          registerBtn.disabled = false;
+
+          registerBtn.textContent =
+            "Create Account";
+        }
+
+      }
+    );
+
+  </script>
+
+</body>
+    </html>
