@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Login</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background:
+        radial-gradient(circle at top, #183b56, #07111d 55%, #03070b);
+      color: white;
+      padding: 20px;
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 420px;
+      padding: 32px 25px;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(18px);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    }
+
+    .logo {
+      width: 65px;
+      height: 65px;
+      margin: 0 auto 18px;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #00d4ff, #0066ff);
+      font-size: 28px;
+      font-weight: bold;
+      box-shadow: 0 10px 30px rgba(0, 150, 255, 0.35);
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #aebdcc;
+      font-size: 14px;
+      margin-bottom: 28px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #dbe7f2;
+      font-size: 14px;
+    }
+
+    .input-group {
+      margin-bottom: 18px;
+    }
+
+    input {
+      width: 100%;
+      padding: 15px;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 13px;
+      outline: none;
+      background: rgba(0,0,0,.25);
+      color: white;
+      font-size: 15px;
+    }
+
+    input:focus {
+      border-color: #00bfff;
+      box-shadow: 0 0 0 3px rgba(0,191,255,.1);
+    }
+
+    input::placeholder {
+      color: #718092;
+    }
+
+    .login-btn {
+      width: 100%;
+      border: none;
+      padding: 16px;
+      border-radius: 13px;
+      background: linear-gradient(135deg, #00c6ff, #0072ff);
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 5px;
+    }
+
+    .login-btn:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+    }
+
+    .message {
+      display: none;
+      margin-top: 16px;
+      padding: 12px;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .message.error {
+      display: block;
+      background: rgba(255, 60, 60, .12);
+      color: #ff8585;
+    }
+
+    .message.success {
+      display: block;
+      background: rgba(40, 220, 130, .12);
+      color: #65e6a0;
+    }
+
+    .register {
+      text-align: center;
+      margin-top: 24px;
+      color: #9baaba;
+      font-size: 14px;
+    }
+
+    .register a {
+      color: #00c6ff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="login-card">
+
+    <div class="logo">A</div>
+
+    <h1>Welcome Back</h1>
+
+    <p class="subtitle">
+      Login to your account
+    </p>
+
+    <form id="loginForm">
+
+      <div class="input-group">
+        <label for="phone">
+          Phone Number
+        </label>
+
+        <input
+          type="tel"
+          id="phone"
+          name="phone"
+          placeholder="07XXXXXXXX"
+          autocomplete="tel"
+          required
+        >
+      </div>
+
+      <div class="input-group">
+        <label for="password">
+          Password
+        </label>
+
+        <input
+          type="password"
+          id="password"
+          name="password"
+          placeholder="Enter your password"
+          autocomplete="current-password"
+          required
+        >
+      </div>
+
+      <button
+        type="submit"
+        class="login-btn"
+        id="loginBtn"
+      >
+        Login
+      </button>
+
+    </form>
+
+    <div
+      id="message"
+      class="message"
+    ></div>
+
+    <div class="register">
+      Don't have an account?
+      <a href="/register">Create account</a>
+    </div>
+
+  </div>
+
+  <script>
+    const form =
+      document.getElementById("loginForm");
+
+    const phoneInput =
+      document.getElementById("phone");
+
+    const passwordInput =
+      document.getElementById("password");
+
+    const loginBtn =
+      document.getElementById("loginBtn");
+
+    const message =
+      document.getElementById("message");
+
+
+    form.addEventListener("submit", async (e) => {
+
+      e.preventDefault();
+
+      message.className = "message";
+      message.textContent = "";
+
+      const phone =
+        phoneInput.value.trim();
+
+      const password =
+        passwordInput.value;
+
+      if (!phone || !password) {
+        message.className =
+          "message error";
+
+        message.textContent =
+          "Enter your phone number and password.";
+
+        return;
+      }
+
+      loginBtn.disabled = true;
+      loginBtn.textContent = "Logging in...";
+
+      try {
+
+        const response =
+          await fetch("/api/auth/login", {
+            method: "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json"
+            },
+
+            credentials: "include",
+
+            body: JSON.stringify({
+              phone,
+              password
+            })
+          });
+
+        const data =
+          await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            data.message ||
+            "Login failed"
+          );
+        }
+
+        if (data.accessToken) {
+          localStorage.setItem(
+            "accessToken",
+            data.accessToken
+          );
+        }
+
+        if (data.user) {
+          localStorage.setItem(
+            "user",
+            JSON.stringify(data.user)
+          );
+        }
+
+        message.className =
+          "message success";
+
+        message.textContent =
+          "Login successful.";
+
+        setTimeout(() => {
+          window.location.href =
+            "/dashboard";
+        }, 700);
+
+      } catch (error) {
+
+        console.error(
+          "LOGIN ERROR:",
+          error
+        );
+
+        message.className =
+          "message error";
+
+        message.textContent =
+          error.message ||
+          "Failed to connect to server.";
+
+      } finally {
+
+        loginBtn.disabled = false;
+        loginBtn.textContent = "Login";
+      }
+
+    });
+  </script>
+
+</body>
+        </html>
