@@ -77,6 +77,34 @@ async function initializeTransaction({
     );
 }
 
+async function chargeMpesa({
+    email,
+    amount,
+    phone,
+    reference
+}) {
+    const normalizedPhone = String(phone || "").startsWith("+")
+        ? String(phone)
+        : `+${String(phone)}`;
+
+    return paystackRequest(
+        "/charge",
+        {
+            method: "POST",
+            body: JSON.stringify({
+                email,
+                amount: Math.round(Number(amount) * 100),
+                currency: config.currency,
+                reference,
+                mobile_money: {
+                    phone: normalizedPhone,
+                    provider: "mpesa"
+                }
+            })
+        }
+    );
+}
+
 
 /*
  * Verify a transaction.
@@ -98,5 +126,6 @@ async function verifyTransaction(
 
 module.exports = {
     initializeTransaction,
+    chargeMpesa,
     verifyTransaction
 };

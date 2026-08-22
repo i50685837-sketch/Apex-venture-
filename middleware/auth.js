@@ -20,9 +20,20 @@ function auth(req, res, next) {
             });
         }
 
+        const accessSecret =
+            process.env.JWT_ACCESS_SECRET ||
+            process.env.JWT_SECRET;
+
+        if (!accessSecret) {
+            return res.status(500).json({
+                success: false,
+                message: "Authentication is not configured"
+            });
+        }
+
         const decoded = jwt.verify(
             token,
-            process.env.JWT_SECRET
+            accessSecret
         );
 
         req.user = {
