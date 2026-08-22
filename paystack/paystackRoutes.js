@@ -4,6 +4,7 @@ const auth = require("../middleware/auth");
 
 const {
     initializePayment,
+    initializeMpesaPayment,
     verifyPayment
 } = require("./paystackController");
 
@@ -13,6 +14,12 @@ router.post(
     "/initialize",
     auth,
     initializePayment
+);
+
+router.post(
+    "/mpesa/stk",
+    auth,
+    initializeMpesaPayment
 );
 
 router.get(

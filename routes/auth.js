@@ -5,6 +5,15 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
+const localTestUser = {
+  _id: "local-test-user",
+  name: "Local Test User",
+  email: process.env.LOCAL_TEST_EMAIL || "local.test@example.com",
+  phone: process.env.LOCAL_TEST_PHONE || "0700000000",
+  password: process.env.LOCAL_TEST_PASSWORD || "TestUser123!",
+  role: "client"
+};
+
 const router = express.Router();
 
 /* =========================================================
@@ -25,16 +34,17 @@ function cleanPhone(phone) {
 
 router.post("/register", async (req, res) => {
   try {
-    const { name, phone, password } = req.body;
+    const { name, email, phone, password } = req.body;
 
-    if (!name || !phone || !password) {
+    if (!name || !email || !phone || !password) {
       return res.status(400).json({
         success: false,
-        message: "Name, phone and password are required"
+        message: "Name, email, phone and password are required"
       });
     }
 
     const cleanName = String(name).trim();
+    const cleanEmail = String(email).trim().toLowerCase();
     const cleanPhoneNumber = cleanPhone(phone);
 
     if (!cleanName) {
@@ -51,10 +61,24 @@ router.post("/register", async (req, res) => {
       });
     }
 
+    if (!cleanEmail) {
+      return res.status(400).json({
+        success: false,
+        message: "Email is required"
+      });
+    }
+
     if (password.length < 8) {
       return res.status(400).json({
         success: false,
         message: "Password must be at least 8 characters"
+      });
+    }
+
+    if (process.env.SKIP_DATABASE === "true") {
+      return res.status(503).json({
+        success: false,
+        message: "Registration is disabled while the database is skipped"
       });
     }
 
@@ -76,6 +100,7 @@ router.post("/register", async (req, res) => {
 
     const user = await User.create({
       name: cleanName,
+      email: cleanEmail,
       phone: cleanPhoneNumber,
       password: hashedPassword
     });
@@ -123,9 +148,11 @@ router.post("/login", async (req, res) => {
 
     const cleanPhoneNumber = cleanPhone(phone);
 
-    const user = await User.findOne({
-      phone: cleanPhoneNumber
-    });
+    const user = process.env.SKIP_DATABASE === "true"
+      ? cleanPhoneNumber === localTestUser.phone
+        ? localTestUser
+        : null
+      : await User.findOne({ phone: cleanPhoneNumber });
 
     if (!user) {
       return res.status(401).json({
@@ -134,10 +161,9 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    const passwordMatch = await bcrypt.compare(
-      password,
-      user.password
-    );
+    const passwordMatch = process.env.SKIP_DATABASE === "true"
+      ? password === user.password
+      : await bcrypt.compare(password, user.password);
 
     if (!passwordMatch) {
       return res.status(401).json({

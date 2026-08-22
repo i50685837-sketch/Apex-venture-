@@ -121,7 +121,7 @@ button:disabled{
 <a href="dashboard.html" class="back">← Back to Dashboard</a>
 
 <h1>Deposit Funds</h1>
-<p class="subtitle">Add money to your Apex Ventures wallet using M-Pesa.</p>
+<p class="subtitle">Add money to your Apex Ventures wallet using Paystack M-Pesa.</p>
 
 <div class="card">
 
@@ -153,7 +153,7 @@ button:disabled{
 <script>
 
 const API_BASE =
-  "https://YOUR-APEX-BACKEND.onrender.com/api/v1";
+  `${window.location.origin}/api/v1`;
 
 /*
   JWT token created during login.
@@ -197,14 +197,68 @@ function normalizePhone(phone){
   }
 
   if(phone.startsWith("+254")){
-    return phone.substring(1);
-  }
-
-  if(phone.startsWith("254")){
     return phone;
   }
 
+  if(phone.startsWith("254")){
+    return "+" + phone;
+  }
+
   return null;
+}
+
+async function monitorPayment(reference){
+  const maxAttempts = 20;
+
+  showStatus(
+    "STK request sent. Waiting for payment confirmation...",
+    "info"
+  );
+
+  for(let attempt = 0; attempt < maxAttempts; attempt++){
+    await new Promise(resolve => setTimeout(resolve, 3000));
+
+    const response = await fetch(
+      `${API_BASE}/paystack/verify/${encodeURIComponent(reference)}`,
+      {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      }
+    );
+
+    const data = await response.json().catch(() => ({}));
+
+    if(!response.ok){
+      throw new Error(data.message || "Could not verify payment");
+    }
+
+    if(data.status === "success"){
+      showStatus(
+        "Payment completed successfully.",
+        "success"
+      );
+      button.textContent = "Payment Successful";
+      return;
+    }
+
+    if(["failed", "abandoned", "reversed"].includes(data.status)){
+      showStatus(
+        data.message || "Payment was cancelled or failed.",
+        "error"
+      );
+      button.disabled = false;
+      button.textContent = "Try Again";
+      return;
+    }
+  }
+
+  showStatus(
+    "Payment confirmation timed out. Check your M-Pesa messages before trying again.",
+    "error"
+  );
+  button.disabled = false;
+  button.textContent = "Try Again";
 }
 
 
@@ -269,7 +323,7 @@ button.addEventListener("click", async ()=>{
   try{
 
     const response = await fetch(
-      `${API_BASE}/payments/mpesa/stk`,
+      `${API_BASE}/paystack/mpesa/stk`,
       {
         method:"POST",
 
@@ -312,6 +366,9 @@ button.addEventListener("click", async ()=>{
         "M-Pesa STK request failed."
       );
     }
+
+    await monitorPayment(data.reference);
+    return;
 
 
     showStatus(

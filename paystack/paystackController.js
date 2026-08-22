@@ -1,4 +1,5 @@
 const crypto = require("crypto");
+const mongoose = require("mongoose");
 
 const User =
     require("../models/User");
@@ -8,8 +9,30 @@ const Transaction =
 
 const {
     initializeTransaction,
+    chargeMpesa,
     verifyTransaction
 } = require("./paystackService");
+
+async function findPaymentUser(userId) {
+    if (process.env.SKIP_DATABASE === "true") {
+        return {
+            _id: userId,
+            email:
+                process.env.LOCAL_TEST_EMAIL ||
+                "local.test@example.com"
+        };
+    }
+
+    return User.findById(userId);
+}
+
+async function recordPendingTransaction(transaction) {
+    if (mongoose.connection.readyState !== 1) {
+        return;
+    }
+
+    await Transaction.create(transaction);
+}
 
 
 async function initializePayment(
@@ -20,9 +43,7 @@ async function initializePayment(
     try {
 
         const user =
-            await User.findById(
-                req.user.id
-            );
+            await findPaymentUser(req.user.id);
 
         if (!user) {
 
@@ -58,7 +79,7 @@ async function initializePayment(
         /*
          * Record the payment as pending.
          */
-        await Transaction.create({
+        await recordPendingTransaction({
 
             user: user._id,
 
@@ -126,6 +147,74 @@ async function initializePayment(
 }
 
 
+async function initializeMpesaPayment(req, res) {
+    try {
+        const user = await findPaymentUser(req.user.id);
+        const amount = Number(req.body.amount);
+        const phone = String(req.body.phone || "").trim();
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        if (!Number.isFinite(amount) || amount <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid amount"
+            });
+        }
+
+        if (!/^\+?254\d{9}$/.test(phone)) {
+            return res.status(400).json({
+                success: false,
+                message: "Enter a valid Kenyan phone number"
+            });
+        }
+
+        const reference =
+            `APEX-${Date.now()}-${crypto
+                .randomBytes(5)
+                .toString("hex")}`;
+
+        const result = await chargeMpesa({
+            email: user.email,
+            amount,
+            phone,
+            reference
+        });
+
+        await recordPendingTransaction({
+            user: user._id,
+            type: "deposit",
+            amount,
+            status: "pending",
+            reference,
+            provider: "paystack",
+            description: "Paystack M-Pesa deposit"
+        });
+
+        return res.json({
+            success: true,
+            reference,
+            status: result.data && result.data.status,
+            displayText:
+                result.data && result.data.display_text
+        });
+    } catch (error) {
+        console.error("Paystack M-Pesa initialize:", error);
+
+        return res.status(502).json({
+            success: false,
+            message:
+                error.message ||
+                "Could not initiate M-Pesa payment"
+        });
+    }
+}
+
 async function verifyPayment(
     req,
     res
@@ -151,6 +240,30 @@ async function verifyPayment(
                 reference
             );
 
+        const providerStatus =
+            result.data.status;
+
+        const transactionStatus = [
+            "success"
+        ].includes(providerStatus)
+            ? "successful"
+            : [
+                "failed",
+                "abandoned",
+                "reversed"
+            ].includes(providerStatus)
+                ? providerStatus === "reversed"
+                    ? "reversed"
+                    : "failed"
+                : "pending";
+
+        if (mongoose.connection.readyState === 1) {
+            await Transaction.findOneAndUpdate(
+                { reference },
+                { status: transactionStatus }
+            );
+        }
+
 
         /*
          * Do NOT credit the wallet merely
@@ -168,7 +281,7 @@ async function verifyPayment(
             success: true,
 
             status:
-                result.data.status,
+                providerStatus,
 
             reference:
                 result.data.reference,
@@ -177,7 +290,12 @@ async function verifyPayment(
                 result.data.amount,
 
             currency:
-                result.data.currency
+                result.data.currency,
+
+            message:
+                result.data.message ||
+                result.data.gateway_response ||
+                ""
 
         });
 
@@ -202,5 +320,6 @@ async function verifyPayment(
 
 module.exports = {
     initializePayment,
+    initializeMpesaPayment,
     verifyPayment
 };

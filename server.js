@@ -24,6 +24,11 @@ const FRONTEND_ORIGIN =
 ========================================================= */
 
 async function connectDatabase() {
+  if (process.env.SKIP_DATABASE === "true") {
+    console.log("Database connection skipped (SKIP_DATABASE=true)");
+    return;
+  }
+
   if (!process.env.MONGO_URI) {
     throw new Error(
       "MONGO_URI is missing from environment variables"
